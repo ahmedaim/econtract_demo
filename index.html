@@ -89,13 +89,13 @@
 <nav id="tabs"></nav>
 <main id="app"></main>
 
+<script src="api-client.js"></script>
 <script src="contract-render.js"></script>
 <script>
 /* ------------------------------------------------------------------
- * Data lives in data/*.json and is read/written through api.php.
- * Seed data is in data/seed/. Rendering and snapshots come from contract-render.js.
+ * Data comes from api-client.js: api.php (data/*.json) when PHP runs, otherwise this browser's
+ * storage seeded from data/seed/ (static hosting). Rendering and snapshots come from contract-render.js.
  * ------------------------------------------------------------------ */
-const API = "api.php";
 const USER_ID = 501;
 const CR = window.ContractRender;
 
@@ -103,16 +103,9 @@ let db = { contracts: [], contract_sections: [], user_contracts: [], contract_de
 let view = { tab: "index", contractId: null, editId: null, form: null, errors: {}, flash: null };
 
 async function load() {
-  const res = await fetch(API, { cache: "no-store" });
-  if (!res.ok) throw new Error(`api.php returned ${res.status}`);
-  db = (await res.json()).tables;
+  db = (await EContractAPI.get()).tables;
 }
-async function call(body) {
-  const res = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-  if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
-  return data;
-}
+const call = body => EContractAPI.post(body);
 
 /* ---------------- helpers ---------------- */
 const esc = CR.esc;
@@ -235,7 +228,7 @@ async function persist(status) {
 
   const parts = builderParts();
   const row = {
-    id: view.editId ?? undefined,   // api.php assigns the next id for new rows
+    id: view.editId ?? undefined,   // the API assigns the next id for new rows
     user_id: USER_ID,
     contract_section_id: main.id,
     main_contract: parts[0],
@@ -593,7 +586,7 @@ document.addEventListener("click", async e => {
   else if (d.del) {
     if (!confirm(`Delete user_contracts #${d.del} and its contract_details row?`)) return;
     try {
-      // Delete the reporting row first: api.php refuses to delete a row that is still referenced.
+      // Delete the reporting row first: the API refuses to delete a row that is still referenced.
       for (const det of db.contract_details.filter(r => r.user_contract_id === +d.del)) {
         await call({ action: "delete", table: "contract_details", id: det.id });
       }
@@ -635,8 +628,8 @@ document.addEventListener("change", e => {
 });
 
 load().then(render).catch(e => {
-  document.getElementById("app").innerHTML = `<div class="card"><b>Could not reach api.php.</b>
-    <p class="muted">${esc(e.message)}. Open this page through Apache, e.g. <code>http://localhost/econtract_demo/</code>, not as a file.</p></div>`;
+  document.getElementById("app").innerHTML = `<div class="card"><b>Couldn't load the demo data.</b>
+    <p class="muted">${esc(e.message)}. Open the site over http(s) (XAMPP or a static host), not as a local file.</p></div>`;
 });
 </script>
 </body>

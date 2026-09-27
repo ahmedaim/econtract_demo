@@ -13,6 +13,12 @@ Needs PHP 8.1+ (for example XAMPP). Put the folder under the web root and open `
 
 There is no database: tables are JSON files in `data/`, read and written through `api.php`. On first request each table is copied from `data/seed/`. "Reset demo data" restores the seed.
 
+## Static hosting (GitHub Pages)
+
+The site also runs without PHP. `api-client.js` checks whether `api.php` answers with JSON; if not, it loads `data/schema.json` and `data/seed/*.json` and applies the same checks as `api.php` in the browser. Changes are then saved in each visitor's browser (localStorage) only, so every visitor starts from the seed data and "Reset demo data" restores it.
+
+To publish on GitHub Pages: repository **Settings → Pages → Build and deployment**, set **Source** to *Deploy from a branch*, branch `main`, folder `/ (root)`. The site is served at `https://<user>.github.io/<repo>/`.
+
 ## Pages
 
 | Page | What it does |

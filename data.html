@@ -87,8 +87,8 @@
 </header>
 <main id="app"><div class="card muted">Loading…</div></main>
 
+<script src="api-client.js"></script>
 <script>
-const API = "api.php";
 
 // Diagram layout: four columns, left = referenced, right = referencing.
 const LAYOUT = [["contracts"], ["contract_sections", "users"], ["user_contracts"], ["contract_details"]];
@@ -102,19 +102,12 @@ const nodeKey = (t, id) => `${t}:${id}`;
 const byId = (t, id) => (tables[t] || []).find(r => Number(r.id) === Number(id));
 
 async function load() {
-  const res = await fetch(API, { cache: "no-store" });
-  if (!res.ok) throw new Error(`api.php returned ${res.status}`);
-  const data = await res.json();
+  const data = await EContractAPI.get();
   ({ schema, tables } = data);
   reportCols = data.reporting_columns;
 }
 
-async function call(body) {
-  const res = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-  if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
-  return data;
-}
+const call = body => EContractAPI.post(body);
 
 /* ---------------- relations ---------------- */
 
@@ -392,14 +385,14 @@ window.addEventListener("resize", () => { if (Object.keys(schema).length) render
       <div class="scroll"><div id="diagram"></div></div>
     </div>
     <div class="card" id="editor"></div>
-    <div class="bar"><div class="muted" style="font-size:12px">Stored in <code>data/*.json</code> via <code>api.php</code>.</div>
+    <div class="bar"><div class="muted" style="font-size:12px">${EContractAPI.mode === "static" ? "Static hosting: changes are saved in this browser only." : "Stored in <code>data/*.json</code> via <code>api.php</code>."}</div>
       <div class="right"><button class="btn danger small" data-reset>Reset from seed</button></div></div>`;
   try {
     await load();
     render();
   } catch (e) {
-    document.getElementById("app").innerHTML = `<div class="card fatal"><b>Could not reach api.php.</b>
-      <p class="muted">${esc(e.message)}. Open this page through Apache, e.g. <code>http://localhost/econtract_demo/data.html</code>, not as a file.</p></div>`;
+    document.getElementById("app").innerHTML = `<div class="card fatal"><b>Couldn't load the demo data.</b>
+      <p class="muted">${esc(e.message)}. Open the site over http(s) (XAMPP or a static host), not as a local file.</p></div>`;
   }
 })();
 </script>

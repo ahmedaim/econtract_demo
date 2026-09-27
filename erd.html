@@ -84,6 +84,7 @@
   </div>
 </main>
 
+<script src="api-client.js"></script>
 <script>
 const TABLES = [
   { name: "contracts", x: 20, y: 30, cols: [
@@ -218,15 +219,14 @@ canvas.addEventListener("mouseleave", () =>
   canvas.querySelectorAll(".hl, .dim").forEach(el => el.classList.remove("hl", "dim")));
 
 // Reporting columns of contract_details come from the section templates in data/*.json.
-fetch("api.php", { cache: "no-store" })
-  .then(r => r.json())
+EContractAPI.get()
   .then(({ reporting_columns: cols, tables }) => {
     const maxLen = k => tables.contract_sections.map(s => s.rules?.[k]?.max_length).find(Boolean) || 255;
     const details = TABLES.find(t => t.name === "contract_details");
     details.cols = details.cols.filter(c => c[0] !== "rep").concat(
       Object.entries(cols).map(([k, type]) => ["rep", k, type === "decimal" ? "DECIMAL(15,2)" : type === "table" || type === "multi" ? "JSON" : type === "textarea" ? "TEXT" : type === "choice" ? "VARCHAR(50)" : `VARCHAR(${maxLen(k)})`]));
   })
-  .catch(() => {})   // opened without Apache: keep the built-in column list
+  .catch(() => {})   // data unavailable: keep the built-in column list
   .finally(() => { buildTables(); drawEdges(); });
 </script>
 </body>

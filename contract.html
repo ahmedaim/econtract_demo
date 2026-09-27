@@ -116,6 +116,7 @@
 </div>
 <div class="desk"><div id="doc"><div class="empty">Loading contract…</div></div></div>
 
+<script src="api-client.js"></script>
 <script src="contract-render.js"></script>
 <script>
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -169,7 +170,7 @@ function renderTypedDoc(uc) {
     ${uc.status === "draft" ? `<div class="watermark" aria-hidden="true">مسودة</div>` : ""}
 
     <header class="doc-head">
-      <div class="ar-main">${esc(contract.title_ar)}<small>${esc(uc.main_contract.title)}</small></div>
+      <div class="ar-main">${esc(contract.title_ar)}${uc.main_contract.title !== contract.title_ar ? `<small>${esc(uc.main_contract.title)}</small>` : ""}</div>
       <div class="seal">e-<br>Contract</div>
       <div class="en-side" dir="ltr">${esc(contract.title_en)}</div>
     </header>
@@ -308,8 +309,7 @@ function show(id) {
 document.getElementById("pick").addEventListener("change", e => show(Number(e.target.value)));
 document.getElementById("printBtn").addEventListener("click", () => window.print());
 
-fetch("api.php", { cache: "no-store" })
-  .then(r => { if (!r.ok) throw new Error(`api.php returned ${r.status}`); return r.json(); })
+EContractAPI.get()
   .then(data => {
     db = data.tables;
     const list = db.user_contracts;
@@ -325,7 +325,7 @@ fetch("api.php", { cache: "no-store" })
     show(wanted);
   })
   .catch(e => {
-    document.getElementById("doc").innerHTML = `<div class="empty"><b>Couldn't load the contract.</b><p>${esc(e.message)}. Open this page through Apache, e.g. http://localhost/econtract_demo/contract.html.</p></div>`;
+    document.getElementById("doc").innerHTML = `<div class="empty"><b>Couldn't load the contract.</b><p>${esc(e.message)}. Open the site over http(s) (XAMPP or a static host), not as a local file.</p></div>`;
   });
 </script>
 </body>
