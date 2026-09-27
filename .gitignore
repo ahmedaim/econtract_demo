@@ -1,0 +1,4 @@
+# Live table files change as the demo is used; api.php recreates them from data/seed/ when missing.
+data/*.json
+!data/schema.json
+data/.lock

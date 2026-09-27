@@ -1,0 +1,793 @@
+[
+    {
+        "id": 2001,
+        "user_contract_id": 1001,
+        "project_name": "Villa A12",
+        "contract_value": "850000.00",
+        "paint_brand": "Jotun",
+        "tile_area_sqm": null,
+        "material_supplier": null,
+        "payment_schedule": null,
+        "boq": null,
+        "phases": null,
+        "extra_warranties": null,
+        "owner_terms": null,
+        "contractor_terms": null,
+        "additional_specs": null,
+        "site_works_items": null,
+        "site_works_materials": null,
+        "site_works_extra": null,
+        "structural_works_items": null,
+        "structural_works_materials": null,
+        "structural_works_extra": null,
+        "metal_works_items": null,
+        "metal_works_materials": null,
+        "metal_works_extra": null,
+        "insulation_works_items": null,
+        "insulation_works_materials": null,
+        "insulation_works_extra": null,
+        "doors_windows_items": null,
+        "doors_windows_materials": null,
+        "doors_windows_extra": null,
+        "finishing_works_items": null,
+        "finishing_works_materials": null,
+        "finishing_works_extra": null,
+        "mechanical_works_items": null,
+        "mechanical_works_materials": null,
+        "mechanical_works_extra": null,
+        "electrical_works_items": null,
+        "electrical_works_materials": null,
+        "electrical_works_extra": null
+    },
+    {
+        "id": 2002,
+        "user_contract_id": 1002,
+        "project_name": null,
+        "contract_value": "100000.00",
+        "paint_brand": null,
+        "tile_area_sqm": null,
+        "material_supplier": "contractor",
+        "payment_schedule": [
+            {
+                "description": "عند استلام موقع المشروع",
+                "percent": "20.00",
+                "amount": "20000.00"
+            },
+            {
+                "description": "بعد اكتمال المرحلتين 2+3",
+                "percent": "30.00",
+                "amount": "30000.00"
+            },
+            {
+                "description": "عند التسليم الابتدائي",
+                "percent": "40.00",
+                "amount": "40000.00"
+            },
+            {
+                "description": "بانتهاء ضمان حسن التنفيذ",
+                "percent": "10.00",
+                "amount": "10000.00"
+            }
+        ],
+        "boq": [
+            {
+                "item": "site_works.fencing",
+                "option": "خشب",
+                "usage": "الواجهة الشمالية",
+                "unit": "متر مربع",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "site_works.fencing",
+                "option": "شينكو",
+                "usage": "الواجهة الجنوبية",
+                "unit": "متر طولي",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "site_works.excavation",
+                "option": "تربة عادية",
+                "usage": "ارتفاع 3 متر",
+                "unit": "متر مكعب",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "site_works.excavation",
+                "option": "تربة صخرية",
+                "usage": "ارتفاع 2 متر",
+                "unit": "متر مكعب",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "structural_works.concrete",
+                "option": "عادية",
+                "usage": "تحت القواعد",
+                "unit": "متر مربع",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "structural_works.concrete",
+                "option": "مسلحة",
+                "usage": "الأعمدة",
+                "unit": "متر مكعب",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "insulation_works.buried",
+                "option": "لفائف البيتومين",
+                "usage": "الخزان الأرضي من الخارج",
+                "unit": "متر مربع",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "insulation_works.roofs",
+                "option": "فوم بولي يوريثان",
+                "usage": "السطح",
+                "unit": "متر مربع",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "metal_works.railings",
+                "option": "ستانلس",
+                "usage": "السلالم الداخلية",
+                "unit": "متر طولي",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "metal_works.railings",
+                "option": "زجاج",
+                "usage": "البلكونات",
+                "unit": "متر مربع",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "doors_windows.wooden_doors",
+                "option": "خشب",
+                "usage": "غرف النوم",
+                "unit": "عدد",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "doors_windows.wooden_doors",
+                "option": "WPC",
+                "usage": "دورات المياه",
+                "unit": "عدد",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "finishing_works.plaster",
+                "option": "لياسة ناعمة",
+                "usage": "جميع الغرف",
+                "unit": "متر مربع",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "finishing_works.plaster",
+                "option": "لياسة مخشنة",
+                "usage": "المطابخ ودورات المياه",
+                "unit": "متر مربع",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "mechanical_works.first_fix",
+                "option": "صرف صحي مدفون",
+                "usage": "دورات المياه في الدور الأرضي",
+                "unit": "مقطوعية",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "mechanical_works.second_fix",
+                "option": "صرف صحي معلق",
+                "usage": "دورات المياه في الأدوار العلوية",
+                "unit": "مقطوعية",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            },
+            {
+                "item": "mechanical_works.second_fix",
+                "option": "سخان فوري",
+                "usage": "دورة مياه المجلس",
+                "unit": "عدد",
+                "unit_price": "",
+                "quantity": "",
+                "cost": ""
+            }
+        ],
+        "phases": [
+            {
+                "works": "أعمال الموقع العام والهيكل الإنشائي",
+                "days": "120.00",
+                "start": "2026-10-01",
+                "end": "2027-01-28"
+            },
+            {
+                "works": "أعمال العزل والأعمال المعدنية والأبواب والنوافذ",
+                "days": "90.00",
+                "start": "2027-01-29",
+                "end": "2027-04-28"
+            },
+            {
+                "works": "أعمال التشطيب والأعمال الميكانيكية والتسليم الابتدائي",
+                "days": "120.00",
+                "start": "2027-04-29",
+                "end": "2027-08-26"
+            }
+        ],
+        "extra_warranties": [],
+        "owner_terms": null,
+        "contractor_terms": null,
+        "additional_specs": null,
+        "site_works_items": [
+            "fencing",
+            "excavation",
+            "termite"
+        ],
+        "site_works_materials": [
+            {
+                "material": "السور المؤقت",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "رمل الردم A3",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "ردم A1A | A1B",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "مكافحة النمل الأبيض",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "خرسانة الممشى",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "بردورة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "بورسلان",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "انترلوك",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "عشب طبيعي",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "عشب صناعي",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "حماية الأرضيات",
+                "spec": "",
+                "manufacturer": ""
+            }
+        ],
+        "site_works_extra": null,
+        "structural_works_items": [
+            "formwork",
+            "rebar",
+            "concrete",
+            "masonry"
+        ],
+        "structural_works_materials": [
+            {
+                "material": "حديد التسليح",
+                "spec": "حديد عالي المقاومة (Grade 60) مطابق للمواصفات السعودية",
+                "manufacturer": ""
+            },
+            {
+                "material": "الكانات",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "أسلاك التربيط",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "خرسانة النظافة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "خرسانة إنشائية",
+                "spec": "خرسانة جاهزة مقاومة 30 ميجاباسكال مقاومة للأملاح",
+                "manufacturer": ""
+            },
+            {
+                "material": "عزل الخرسانة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الطوب العادي",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الطوب المعزول",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الإسمنت",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "شبك حديد",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "أشاير حديد",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "زاوية",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الأعتاب",
+                "spec": "",
+                "manufacturer": ""
+            }
+        ],
+        "structural_works_extra": null,
+        "metal_works_items": [
+            "railings",
+            "grilles"
+        ],
+        "metal_works_materials": [
+            {
+                "material": "ماسورة الدرابزين",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "أعمدة الدرابزين",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "زجاج الدرابزين",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "شبك الحماية",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "سلم السطح",
+                "spec": "",
+                "manufacturer": ""
+            }
+        ],
+        "metal_works_extra": null,
+        "insulation_works_items": [
+            "buried",
+            "roofs",
+            "wet_areas"
+        ],
+        "insulation_works_materials": [
+            {
+                "material": "عزل برايمر",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "العزل المائي للسطح",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "العزل الحراري للسطح",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "العزل المائي للمناطق الرطبة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "العزل الخارجي للخزانات",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "العزل الداخلي للخزانات",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "طبقة حماية العزل",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "سكريد خرسانة الميول",
+                "spec": "",
+                "manufacturer": ""
+            }
+        ],
+        "insulation_works_extra": null,
+        "doors_windows_items": [
+            "steel_doors",
+            "wooden_doors",
+            "aluminium"
+        ],
+        "doors_windows_materials": [
+            {
+                "material": "باب الحديد",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "باب الخشب",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "باب WPC",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "قطاع الألمنيوم",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الزجاج",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الحلوق",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "المسكة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الكيلون",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "القفل",
+                "spec": "",
+                "manufacturer": ""
+            }
+        ],
+        "doors_windows_extra": null,
+        "finishing_works_items": [
+            "plaster",
+            "gypsum",
+            "floors",
+            "paint"
+        ],
+        "finishing_works_materials": [
+            {
+                "material": "اسمنت اللياسة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "رمل اللياسة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "ألواح الجبس",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "فتحات الصيانة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الكرانيش الجبسية",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "سيمنت بورد",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "السيراميك",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "البورسلان",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الرخام",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الحجر",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "غراء تثبيت الأرضيات",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "غراء تثبيت الرخام",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الترويبة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "نعلات PVC",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الدهان الداخلي",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "معجون الدهان",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الرشة الخارجية",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "دهان البروفايل",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "خرسانة الممشى",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "بردورة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "بورسلان",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "انترلوك",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "عشب طبيعي",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "عشب صناعي",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "حماية الأرضيات",
+                "spec": "",
+                "manufacturer": ""
+            }
+        ],
+        "finishing_works_extra": null,
+        "mechanical_works_items": [
+            "first_fix",
+            "second_fix",
+            "third_fix",
+            "hvac"
+        ],
+        "mechanical_works_materials": [
+            {
+                "material": "الخزان الأرضي",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "الخزان العلوي",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "المضخة الغاطسة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "مضخة التعزيز",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "سخان المياه",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "مواسير المياه الباردة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "مواسير المياه الساخنة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "مواسير الصرف الصحي",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "مواسير الفريون",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "مواسير الري",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "كرسي دورة المياه",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "مغسلة دورة المياه",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "خلاط المغسلة",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "خلاط الشاور",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "زجاج الشاور",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "طقم إكسسوارات الحمام",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "صفاية دورة المياه",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "صفاية السطح",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "صفاية الكراج",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "صفاية صرف المطر",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "مراوح الشفط",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "المكيفات",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "شبكة الغاز المركزي",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "المصاعد",
+                "spec": "",
+                "manufacturer": ""
+            },
+            {
+                "material": "المسابح",
+                "spec": "",
+                "manufacturer": ""
+            }
+        ],
+        "mechanical_works_extra": null,
+        "electrical_works_items": null,
+        "electrical_works_materials": null,
+        "electrical_works_extra": null
+    }
+]

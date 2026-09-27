@@ -1,0 +1,55 @@
+{
+  "users": {
+    "id_start": 501,
+    "columns": [
+      { "name": "id", "type": "pk" },
+      { "name": "name", "type": "string", "required": true },
+      { "name": "email", "type": "string" }
+    ]
+  },
+  "contracts": {
+    "id_start": 1,
+    "columns": [
+      { "name": "id", "type": "pk" },
+      { "name": "title_ar", "type": "string", "required": true },
+      { "name": "title_en", "type": "string", "required": true }
+    ]
+  },
+  "contract_sections": {
+    "id_start": 101,
+    "columns": [
+      { "name": "id", "type": "pk" },
+      { "name": "contract_id", "type": "fk", "ref": "contracts", "required": true },
+      { "name": "type", "type": "enum", "values": ["main", "sub"], "required": true },
+      { "name": "template_structure", "type": "json", "required": true,
+        "default": { "section_key": "", "version": 1, "fixed": false, "paragraph_order": [], "inputs": [] } },
+      { "name": "template", "type": "json", "required": true,
+        "default": { "title": "", "paragraphs": [] } },
+      { "name": "rules", "type": "json", "default": {} },
+      { "name": "status", "type": "enum", "values": ["active", "inactive"], "required": true }
+    ]
+  },
+  "user_contracts": {
+    "id_start": 1001,
+    "columns": [
+      { "name": "id", "type": "pk" },
+      { "name": "user_id", "type": "fk", "ref": "users", "required": true },
+      { "name": "contract_section_id", "type": "fk", "ref": "contract_sections", "required": true },
+      { "name": "main_contract", "type": "json", "required": true, "default": {} },
+      { "name": "sub_contract", "type": "json", "required": true, "default": [] },
+      { "name": "status", "type": "enum", "values": ["draft", "submitted"], "required": true }
+    ],
+    "json_refs": [
+      { "column": "main_contract", "key": "source_section_id", "ref": "contract_sections" },
+      { "column": "sub_contract", "key": "source_section_id", "ref": "contract_sections" }
+    ]
+  },
+  "contract_details": {
+    "id_start": 2001,
+    "reporting_columns": true,
+    "columns": [
+      { "name": "id", "type": "pk" },
+      { "name": "user_contract_id", "type": "fk", "ref": "user_contracts", "required": true }
+    ]
+  }
+}

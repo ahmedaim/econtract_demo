@@ -1,0 +1,2 @@
+# Table files are served through api.php only.
+Require all denied

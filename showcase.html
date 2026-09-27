@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Villa Contract Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f3f5f6;
+    --surface: #ffffff;
+    --surface-2: #e9eef0;
+    --ink: #13232b;
+    --ink-2: #4a5b63;
+    --line: #d3dce0;
+    --accent: #0f766e;
+    --accent-soft: #d7efec;
+    --main: #a4610b;
+    --main-soft: #f6e7cf;
+    --json: #6450c8;
+    --json-soft: #e8e4fa;
+    --null: #8a979d;
+    --edge: #9fb0b7;
+    --paper: #fffefb;
+    --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --arabic: "IBM Plex Sans Arabic", Tahoma, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0f171b; --surface: #162228; --surface-2: #1d2c33; --ink: #e4ecef; --ink-2: #9db0b8;
+      --line: #2b3d45; --accent: #3fb8ab; --accent-soft: #143a37; --main: #e0a04a; --main-soft: #3a2a14;
+      --json: #a597f0; --json-soft: #2a2548; --null: #6f8088; --edge: #4b626b; --paper: #1a272d;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0f171b; --surface: #162228; --surface-2: #1d2c33; --ink: #e4ecef; --ink-2: #9db0b8;
+    --line: #2b3d45; --accent: #3fb8ab; --accent-soft: #143a37; --main: #e0a04a; --main-soft: #3a2a14;
+    --json: #a597f0; --json-soft: #2a2548; --null: #6f8088; --edge: #4b626b; --paper: #1a272d;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 var(--sans); padding-inline: 16px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 64px; display: flex; flex-direction: column; gap: 56px; }
+  h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2; }
+  h2 { font-size: 24px; font-weight: 600; }
+  h3 { font-size: 16px; font-weight: 600; }
+  p { margin: 0; }
+  .eyebrow { font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  .lede { color: var(--ink-2); max-width: 65ch; }
+  .mono { font-family: var(--mono); font-size: .86em; }
+  .ar { font-family: var(--arabic); direction: rtl; unicode-bidi: isolate; }
+  .section-head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* top bar */
+  .topbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); }
+  .brand { font-weight: 700; color: var(--ink); letter-spacing: .01em; }
+  .source { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+  .source i { width: 7px; height: 7px; border-radius: 50%; background: var(--null); }
+  .source.live i { background: var(--accent); }
+  .topbar nav { margin-left: auto; display: flex; gap: 16px; }
+  .topbar a { color: var(--ink-2); text-decoration: none; }
+  .topbar a:hover, .topbar a:focus-visible { color: var(--accent); }
+
+  /* hero */
+  .hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 32px; align-items: end; padding-top: 12px; }
+  .hero h1 { font-size: clamp(30px, 4.4vw, 46px); font-weight: 700; letter-spacing: -.01em; }
+  .hero .ar-title { font-family: var(--arabic); font-size: clamp(22px, 3vw, 30px); color: var(--ink-2); margin-top: 6px; direction: rtl; text-align: left; unicode-bidi: plaintext; }
+  .hero .lede { margin-top: 16px; }
+  .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 2px solid var(--ink); }
+  .facts div { padding: 12px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
+  .facts div:nth-child(odd) { padding-right: 16px; }
+  .facts div:nth-child(even) { padding-left: 16px; border-left: 1px solid var(--line); }
+  .facts b { font-variant-numeric: tabular-nums; }
+  @media (max-width: 820px) { .hero { grid-template-columns: 1fr; } }
+
+  /* flow */
+  .flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+  .step { padding: 20px 20px 22px; display: flex; flex-direction: column; gap: 10px; position: relative; }
+  .step + .step { border-left: 1px solid var(--line); }
+  .step + .step::before { content: ""; position: absolute; left: -7px; top: 28px; width: 12px; height: 12px; background: var(--surface); border-top: 1px solid var(--line); border-right: 1px solid var(--line); transform: rotate(45deg); }
+  .step .n { font: 500 12px var(--mono); color: var(--ink-2); }
+  .step .tbl { font: 12px var(--mono); color: var(--accent); }
+  .step p { color: var(--ink-2); font-size: 14px; }
+  .step ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+  .step li { display: flex; gap: 8px; align-items: baseline; }
+  @media (max-width: 900px) {
+    .flow { grid-template-columns: 1fr; }
+    .step + .step { border-left: 0; border-top: 1px solid var(--line); }
+    .step + .step::before { left: 28px; top: -7px; transform: rotate(135deg); }
+  }
+
+  .pill { display: inline-block; font: 500 11px var(--mono); padding: 1px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+  .pill.main { background: var(--main-soft); color: var(--main); }
+  .pill.sub { background: var(--accent-soft); color: var(--accent); }
+  .pill.json { background: var(--json-soft); color: var(--json); }
+  .pill.draft { background: var(--main-soft); color: var(--main); }
+  .pill.submitted { background: var(--accent-soft); color: var(--accent); }
+
+  /* relations diagram */
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13px; color: var(--ink-2); margin-bottom: 16px; align-items: center; }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 28px; border-top: 2px solid var(--edge); }
+  .sw.json { border-top: 2px dashed var(--json); }
+  .legend button { margin-left: auto; }
+  .scroll { overflow-x: auto; }
+  #diagram { position: relative; display: grid; grid-template-columns: repeat(4, 220px); column-gap: 72px; width: max-content; padding: 4px 4px 8px; }
+  #diagram svg { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+  .dcol { display: flex; flex-direction: column; gap: 10px; }
+  .gtitle { display: flex; flex-direction: column; margin-top: 10px; }
+  .gtitle:first-child { margin-top: 0; }
+  .gtitle b { font-size: 13px; }
+  .gtitle span { font: 11px var(--mono); color: var(--ink-2); }
+  .node { position: relative; z-index: 1; text-align: left; font: inherit; color: inherit; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; transition: opacity .2s, border-color .2s, box-shadow .2s; }
+  .node:hover { border-color: var(--edge); }
+  .node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .node .t { font-size: 13px; font-weight: 600; display: flex; gap: 6px; align-items: baseline; }
+  .node .t em { font: normal 11px var(--mono); color: var(--ink-2); margin-left: auto; }
+  .node .s { font-size: 12px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .node.sel { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .node.k-main { box-shadow: inset 3px 0 0 var(--main); }
+  .node.k-sub { box-shadow: inset 3px 0 0 var(--accent); }
+  .node.k-main.sel { box-shadow: inset 3px 0 0 var(--main), 0 0 0 3px var(--accent-soft); }
+  .node.k-sub.sel { box-shadow: inset 3px 0 0 var(--accent), 0 0 0 3px var(--accent-soft); }
+  path.edge { fill: none; stroke: var(--edge); stroke-width: 1.5; transition: opacity .2s; }
+  path.edge.json { stroke: var(--json); stroke-dasharray: 5 4; }
+  path.edge.on { stroke: var(--accent); stroke-width: 2.25; }
+  path.edge.json.on { stroke: var(--json); }
+  .dim { opacity: .18; }
+  .hint { font-size: 13px; color: var(--ink-2); margin-top: 12px; }
+
+  .btn { font: 500 13px var(--sans); color: var(--accent); background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+
+  /* contract document */
+  .picker { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .doc-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .doc-grid { grid-template-columns: 1fr; } }
+  .paper { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 36px 40px 40px; box-shadow: 0 1px 0 var(--line), 0 12px 28px -18px rgba(19, 35, 43, .35); display: flex; flex-direction: column; gap: 22px; }
+  @media (max-width: 600px) { .paper { padding: 24px 20px; } }
+  .paper header { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 14px; }
+  .paper header h3 { font-size: 20px; }
+  .paper header .ar { font-size: 17px; color: var(--ink-2); }
+  .paper .meta { font-size: 13px; color: var(--ink-2); display: flex; gap: 6px 16px; flex-wrap: wrap; }
+  .clause { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 4px 10px; }
+  .clause .no { font: 600 14px var(--mono); color: var(--ink-2); padding-top: 1px; }
+  .clause h4 { margin: 0; font-size: 15px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .clause p { grid-column: 2; color: var(--ink); max-width: 65ch; }
+  .v { background: var(--accent-soft); color: var(--ink); border-radius: 3px; padding: 0 4px; font-weight: 500; }
+  .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 8px; font-size: 12px; color: var(--ink-2); }
+  .sign div { border-top: 1px solid var(--ink-2); padding-top: 6px; }
+
+  .side { display: flex; flex-direction: column; gap: 16px; }
+  .side h3 { font-size: 14px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .kv { display: grid; grid-template-columns: auto minmax(0, 1fr); border-top: 1px solid var(--line); font-size: 13px; }
+  .kv dt, .kv dd { margin: 0; padding: 7px 0; border-bottom: 1px solid var(--line); }
+  .kv dt { font-family: var(--mono); font-size: 12px; color: var(--ink-2); padding-right: 16px; }
+  .kv dd { text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .kv dd.null { color: var(--null); font-style: italic; }
+  pre { margin: 0; background: var(--surface-2); color: var(--ink); border-radius: 6px; padding: 12px 14px; font: 12px/1.5 var(--mono); overflow: auto; max-height: 280px; }
+  details summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+  details[open] summary { margin-bottom: 8px; }
+
+  /* reporting table */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font: 500 12px var(--mono); color: var(--ink-2); background: var(--surface-2); }
+  th small { display: block; font-size: 10px; color: var(--null); }
+  tr:last-child td { border-bottom: 0; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  td.null { color: var(--null); font-style: italic; }
+
+  /* templates */
+  .tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .tpl { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .tpl .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .tpl .text { font-size: 14px; color: var(--ink); background: var(--paper); border-left: 2px solid var(--line); padding: 8px 12px; }
+  .ph { font-family: var(--mono); font-size: 12px; background: var(--main-soft); color: var(--main); border-radius: 3px; padding: 0 4px; }
+  .inputs { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+  .inputs div { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .inputs code { font-family: var(--mono); font-size: 12px; }
+  .inputs .r { color: var(--ink-2); font-size: 12px; }
+
+  footer { font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 16px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <p class="lede">Loading contract data…</p>
+</div>
+
+<script>
+// Built-in copy of the demo data, used when api.php can't be reached (e.g. the file is opened directly).
+const SNAPSHOT = {"schema":{"users":{"id_start":501,"columns":[{"name":"id","type":"pk"},{"name":"name","type":"string","required":true},{"name":"email","type":"string"}]},"contracts":{"id_start":1,"columns":[{"name":"id","type":"pk"},{"name":"title_ar","type":"string","required":true},{"name":"title_en","type":"string","required":true}]},"contract_sections":{"id_start":101,"columns":[{"name":"id","type":"pk"},{"name":"contract_id","type":"fk","ref":"contracts","required":true},{"name":"type","type":"enum","values":["main","sub"],"required":true},{"name":"template_structure","type":"json","required":true,"default":{"section_key":"","version":1,"fixed":false,"paragraph_order":[],"inputs":[]}},{"name":"template","type":"json","required":true,"default":{"title":"","paragraphs":[]}},{"name":"rules","type":"json","default":[]},{"name":"status","type":"enum","values":["active","inactive"],"required":true}]},"user_contracts":{"id_start":1001,"columns":[{"name":"id","type":"pk"},{"name":"user_id","type":"fk","ref":"users","required":true},{"name":"contract_section_id","type":"fk","ref":"contract_sections","required":true},{"name":"main_contract","type":"json","required":true,"default":[]},{"name":"sub_contract","type":"json","required":true,"default":[]},{"name":"status","type":"enum","values":["draft","submitted"],"required":true}],"json_refs":[{"column":"main_contract","key":"source_section_id","ref":"contract_sections"},{"column":"sub_contract","key":"source_section_id","ref":"contract_sections"}]},"contract_details":{"id_start":2001,"reporting_columns":true,"columns":[{"name":"id","type":"pk"},{"name":"user_contract_id","type":"fk","ref":"user_contracts","required":true}]}},"reporting_columns":{"project_name":"text","contract_value":"decimal","paint_brand":"text","tile_area_sqm":"decimal"},"tables":{"users":[{"id":501,"name":"Demo Contractor","email":"contractor501@example.com"}],"contracts":[{"id":1,"title_ar":"عقد إنشاء فيلا","title_en":"Villa Construction Contract"}],"contract_sections":[{"id":101,"contract_id":1,"type":"main","template_structure":{"section_key":"main_terms","version":1,"fixed":true,"paragraph_order":["project_scope"],"inputs":[{"key":"project_name","type":"text","required":true},{"key":"contract_value","type":"decimal","required":true}]},"template":{"title":"Main Contract","paragraphs":[{"id":"project_scope","text":"The contractor shall execute {{project_name}} for a total value of SAR {{contract_value}}."}]},"rules":{"project_name":{"required":true,"max_length":255},"contract_value":{"required":true,"min":1},"allow_paragraph_removal":false},"status":"active"},{"id":102,"contract_id":1,"type":"sub","template_structure":{"section_key":"painting_works","version":1,"fixed":false,"paragraph_order":["painting_scope"],"inputs":[{"key":"paint_brand","type":"text","required":true}]},"template":{"title":"Painting Works","paragraphs":[{"id":"painting_scope","text":"The contractor shall complete painting works using {{paint_brand}} paint."}]},"rules":{"paint_brand":{"required":true,"max_length":100},"selection_optional":true},"status":"active"},{"id":103,"contract_id":1,"type":"sub","template_structure":{"section_key":"tiling_works","version":1,"fixed":false,"paragraph_order":["tiling_scope"],"inputs":[{"key":"tile_area_sqm","type":"decimal","required":true}]},"template":{"title":"Tiling Works","paragraphs":[{"id":"tiling_scope","text":"The contractor shall supply and install floor tiles covering {{tile_area_sqm}} square metres."}]},"rules":{"tile_area_sqm":{"required":true,"min":1},"selection_optional":true},"status":"active"}],"user_contracts":[{"id":1001,"user_id":501,"contract_section_id":101,"main_contract":{"source_section_id":101,"section_key":"main_terms","version":1,"title":"Main Contract","fixed":true,"paragraph_order":["project_scope"],"paragraphs":[{"id":"project_scope","text":"The contractor shall execute {{project_name}} for a total value of SAR {{contract_value}}."}],"inputs":[{"key":"project_name","type":"text","required":true,"value":"Villa A12"},{"key":"contract_value","type":"decimal","required":true,"value":"850000.00"}],"rules":{"project_name":{"required":true,"max_length":255},"contract_value":{"required":true,"min":1},"allow_paragraph_removal":false}},"sub_contract":[{"source_section_id":102,"section_key":"painting_works","version":1,"title":"Painting Works","fixed":false,"order":1,"paragraph_order":["painting_scope"],"paragraphs":[{"id":"painting_scope","text":"The contractor shall complete painting works using {{paint_brand}} paint."}],"inputs":[{"key":"paint_brand","type":"text","required":true,"value":"Jotun"}],"rules":{"paint_brand":{"required":true,"max_length":100},"selection_optional":true}}],"status":"draft"}],"contract_details":[{"id":2001,"user_contract_id":1001,"project_name":"Villa A12","contract_value":"850000.00","paint_brand":"Jotun","tile_area_sqm":null}]}};
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const key = (t, id) => `${t}:${id}`;
+
+const GROUPS = {
+  contracts: ["Contract", "contracts"],
+  contract_sections: ["Section templates", "contract_sections"],
+  users: ["Contractors", "users"],
+  user_contracts: ["Contractor contracts", "user_contracts"],
+  contract_details: ["Reporting rows", "contract_details"],
+};
+const LAYOUT = [["contracts"], ["contract_sections", "users"], ["user_contracts"], ["contract_details"]];
+
+let D, selected = null, docId = null;
+
+async function loadData() {
+  try {
+    const res = await fetch("api.php", { cache: "no-store" });
+    if (!res.ok) throw new Error();
+    return { ...(await res.json()), live: true };
+  } catch {
+    if (!SNAPSHOT) throw new Error("No data available.");
+    return { ...SNAPSHOT, live: false };
+  }
+}
+
+const T = t => D.tables[t] || [];
+const find = (t, id) => T(t).find(r => Number(r.id) === Number(id));
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+
+function valuesOf(uc) {
+  const v = {};
+  for (const i of uc.main_contract?.inputs || []) v[i.key] = i.value;
+  for (const s of uc.sub_contract || []) for (const i of s.inputs || []) v[i.key] = i.value;
+  return v;
+}
+function fill(text, values) {
+  return esc(text).replace(/\{\{(\w+)\}\}/g, (_, k) =>
+    values[k] != null && values[k] !== "" ? `<span class="v">${esc(values[k])}</span>` : `<span class="ph">{{${k}}}</span>`);
+}
+function placeholders(text) {
+  return esc(text).replace(/\{\{(\w+)\}\}/g, (_, k) => `<span class="ph">{{${k}}}</span>`);
+}
+function ordered(sec) {
+  const paras = sec.paragraphs || sec.template?.paragraphs || [];
+  const order = sec.paragraph_order || sec.template_structure?.paragraph_order || paras.map(p => p.id);
+  return order.map(id => paras.find(p => p.id === id)).filter(Boolean);
+}
+function money(v) {
+  const n = Number(v);
+  return isNaN(n) ? esc(v) : n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/* ---------- relations ---------- */
+
+function links() {
+  const out = [];
+  for (const [t, def] of Object.entries(D.schema)) {
+    for (const r of T(t)) {
+      for (const c of def.columns.filter(c => c.type === "fk")) {
+        if (r[c.name] != null) out.push({ from: key(t, r.id), to: key(c.ref, r[c.name]), json: false, via: c.name });
+      }
+      for (const ref of def.json_refs || []) {
+        const v = r[ref.column];
+        for (const it of Array.isArray(v) ? v : v ? [v] : []) {
+          const id = it?.[ref.key];
+          if (id == null || out.some(l => l.from === key(t, r.id) && l.to === key(ref.ref, id))) continue;
+          out.push({ from: key(t, r.id), to: key(ref.ref, id), json: true, via: `${ref.column}[].${ref.key}` });
+        }
+      }
+    }
+  }
+  return out;
+}
+
+function chain(k, all) {
+  const seen = new Set([k]);
+  for (const dir of ["up", "down"]) {
+    const stack = [k];
+    while (stack.length) {
+      const cur = stack.pop();
+      for (const l of all) {
+        const [a, b] = dir === "up" ? [l.from, l.to] : [l.to, l.from];
+        if (a === cur && !seen.has(b)) { seen.add(b); stack.push(b); }
+      }
+    }
+  }
+  return seen;
+}
+
+function nodeText(t, r) {
+  switch (t) {
+    case "contracts": return { title: r.title_en, sub: r.title_ar, ar: true };
+    case "users": return { title: r.name, sub: r.email };
+    case "contract_sections": return {
+      title: r.template?.title,
+      sub: `${r.type === "main" ? "Main · fixed" : "Optional"} · ${r.template_structure?.section_key}`,
+      kind: r.type === "main" ? "k-main" : "k-sub"
+    };
+    case "user_contracts": {
+      const u = find("users", r.user_id);
+      const n = (r.sub_contract || []).length;
+      return { title: u ? u.name : `User #${r.user_id}`, sub: `${r.status} · main + ${plural(n, "optional section")}` };
+    }
+    case "contract_details": {
+      const shown = Object.keys(D.reporting_columns).filter(k => r[k] != null && typeof r[k] !== "object").map(k => r[k]);
+      return { title: shown[0] ?? "No values", sub: shown.slice(1).join(" · ") };
+    }
+  }
+  return { title: "", sub: "" };
+}
+
+function renderDiagram() {
+  const all = links();
+  const active = selected ? chain(selected, all) : null;
+  const box = document.getElementById("diagram");
+  box.innerHTML = `<svg aria-hidden="true"></svg>` + LAYOUT.map(group => `<div class="dcol">${group.map(t => `
+      <div class="gtitle"><b>${GROUPS[t][0]}</b><span>${GROUPS[t][1]}</span></div>
+      ${T(t).map(r => {
+        const k = key(t, r.id), n = nodeText(t, r);
+        return `<button type="button" class="node ${n.kind || ""} ${selected === k ? "sel" : ""} ${active && !active.has(k) ? "dim" : ""}" data-node="${k}">
+          <span class="t">${esc(n.title)}<em>#${esc(r.id)}</em></span>
+          ${n.sub ? `<span class="s ${n.ar ? "ar" : ""}">${esc(n.sub)}</span>` : ""}
+        </button>`;
+      }).join("")}`).join("")}</div>`).join("");
+
+  requestAnimationFrame(() => {
+    const svg = box.querySelector("svg"), base = box.getBoundingClientRect();
+    svg.setAttribute("width", box.scrollWidth);
+    svg.setAttribute("height", box.scrollHeight);
+    svg.innerHTML = all.map(l => {
+      const a = box.querySelector(`[data-node="${l.from}"]`), b = box.querySelector(`[data-node="${l.to}"]`);
+      if (!a || !b) return "";
+      const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+      const x1 = ra.left - base.left, y1 = ra.top - base.top + ra.height / 2;
+      const x2 = rb.right - base.left, y2 = rb.top - base.top + rb.height / 2;
+      const m = (x1 + x2) / 2;
+      const on = active && active.has(l.from) && active.has(l.to);
+      return `<path class="edge ${l.json ? "json" : ""} ${on ? "on" : ""} ${active && !on ? "dim" : ""}" d="M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}"></path>`;
+    }).join("");
+  });
+
+  document.getElementById("traceHint").textContent = selected
+    ? `Showing everything connected to ${GROUPS[selected.split(":")[0]][1]} #${selected.split(":")[1]}.`
+    : "Select any record to trace what it depends on and what depends on it.";
+}
+
+/* ---------- page ---------- */
+
+function render() {
+  const contract = T("contracts")[0] || { title_en: "Contract", title_ar: "" };
+  const sections = T("contract_sections").filter(s => s.contract_id === contract.id);
+  const mains = sections.filter(s => s.type === "main"), subs = sections.filter(s => s.type === "sub");
+  const ucs = T("user_contracts").filter(u => sections.some(s => s.id === u.contract_section_id));
+  const ownKeys = new Set(sections.flatMap(s => s.template_structure.inputs.map(i => i.key)));
+  const repCols = Object.entries(D.reporting_columns).filter(([k]) => ownKeys.has(k));
+  if (docId == null || !find("user_contracts", docId)) docId = ucs[0]?.id ?? null;
+
+  document.getElementById("app").innerHTML = `
+    <div class="topbar">
+      <span class="brand">eContract</span>
+      <span class="source ${D.live ? "live" : ""}"><i></i>${D.live ? "Live data" : "Sample data"}</span>
+      <nav><a href="index.html">Try the demo</a><a href="data.html">Data editor</a><a href="erd.html">Schema</a></nav>
+    </div>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Contract builder · data model</div>
+        <h1>${esc(contract.title_en)}</h1>
+        <div class="ar-title" lang="ar">${esc(contract.title_ar)}</div>
+        <p class="lede">A contract is built from reusable section templates. The main section is always included; the contractor adds optional sections and fills in the blanks. Each saved contract keeps its own copy of the wording, and every entered value is also written to a reporting row.</p>
+      </div>
+      <div class="facts">
+        <div><span>Main sections</span><b>${mains.length}</b></div>
+        <div><span>Optional sections</span><b>${subs.length}</b></div>
+        <div><span>Contractors</span><b>${T("users").length}</b></div>
+        <div><span>Saved contracts</span><b>${ucs.length}</b></div>
+        <div><span>Reporting rows</span><b>${T("contract_details").length}</b></div>
+        <div><span>Reporting columns</span><b>${repCols.length}</b></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div class="eyebrow">How a contract moves through the system</div>
+        <h2>From template to report in four steps</h2>
+      </div>
+      <div class="flow">
+        <div class="step">
+          <span class="n">Step 1</span><h3>Define the contract</h3><span class="tbl">contracts</span>
+          <p>The contract appears in the index with English and Arabic titles.</p>
+          <ul>${T("contracts").map(c => `<li>${esc(c.title_en)}</li>`).join("")}</ul>
+        </div>
+        <div class="step">
+          <span class="n">Step 2</span><h3>Attach section templates</h3><span class="tbl">contract_sections</span>
+          <p>Each section holds its paragraphs, inputs and validation rules.</p>
+          <ul>${sections.map(s => `<li><span class="pill ${s.type}">${s.type === "main" ? "main" : "optional"}</span>${esc(s.template?.title)}</li>`).join("")}</ul>
+        </div>
+        <div class="step">
+          <span class="n">Step 3</span><h3>Contractor fills it in</h3><span class="tbl">user_contracts</span>
+          <p>The chosen sections, their wording, rules and entered values are saved together as JSON.</p>
+          <ul><li><span class="pill json">main_contract</span>one object</li><li><span class="pill json">sub_contract</span>one item per optional section</li></ul>
+        </div>
+        <div class="step">
+          <span class="n">Step 4</span><h3>Report on the values</h3><span class="tbl">contract_details</span>
+          <p>Every input becomes a real column. Inputs from sections that weren't chosen are stored as NULL.</p>
+          <ul>${repCols.slice(0, 4).map(([k]) => `<li class="mono">${esc(k)}</li>`).join("")}</ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div class="eyebrow">Record relations</div>
+        <h2>How the records connect</h2>
+        <p class="lede">Each box is a real record. Lines point from a record to the one it references.</p>
+      </div>
+      <div class="panel">
+        <div class="legend">
+          <span><span class="sw"></span>Foreign key</span>
+          <span><span class="sw json"></span>Section id stored inside the saved JSON</span>
+          <button type="button" class="btn" data-clear>Clear selection</button>
+        </div>
+        <div class="scroll"><div id="diagram"></div></div>
+        <p class="hint" id="traceHint"></p>
+      </div>
+    </section>
+
+    ${ucs.length ? `<section>
+      <div class="section-head">
+        <div class="eyebrow">What the contractor sees</div>
+        <h2>The finished contract</h2>
+        <p class="lede">Rendered from the copy saved with the contractor's contract, so later template edits don't change a signed document. Filled-in values are highlighted.</p>
+      </div>
+      ${ucs.length > 1 ? `<div class="picker">${ucs.map(u => `<button type="button" class="btn" data-doc="${u.id}" aria-pressed="${u.id === docId}">#${u.id} ${esc(find("users", u.user_id)?.name ?? "")}</button>`).join("")}</div>` : ""}
+      ${renderDoc(find("user_contracts", docId), contract)}
+    </section>` : ""}
+
+    <section>
+      <div class="section-head">
+        <div class="eyebrow">Reporting</div>
+        <h2>One row per contract, one column per input</h2>
+        <p class="lede">Values are copied from the saved contract into plain columns, so they can be filtered, summed and exported without reading JSON.</p>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>id</th><th>user_contract_id</th>${repCols.map(([k, type]) => `<th>${esc(k)}<small>${type === "decimal" ? "DECIMAL(15,2)" : "VARCHAR"}</small></th>`).join("")}</tr></thead>
+        <tbody>${T("contract_details").map(r => `<tr><td class="num">${r.id}</td><td class="num">${r.user_contract_id}</td>${repCols.map(([k, type]) =>
+          r[k] == null ? `<td class="null">NULL</td>` : `<td class="${type === "decimal" ? "n" : ""}">${type === "decimal" ? money(r[k]) : esc(r[k])}</td>`).join("")}</tr>`).join("")
+          || `<tr><td colspan="${repCols.length + 2}" class="null">No reporting rows yet</td></tr>`}</tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div class="eyebrow">Section library</div>
+        <h2>Templates the contractor can use</h2>
+      </div>
+      <div class="tpl-grid">${sections.map(s => `
+        <article class="tpl">
+          <div class="head"><h3>${esc(s.template?.title)}</h3><span class="pill ${s.type}">${s.type === "main" ? "main · fixed" : "optional"}</span></div>
+          <div class="mono" style="color:var(--ink-2)">${esc(s.template_structure?.section_key)} · v${esc(s.template_structure?.version)}</div>
+          ${ordered(s).map(p => `<p class="text">${placeholders(p.text)}</p>`).join("")}
+          <div class="inputs">${(s.template_structure?.inputs || []).map(i => {
+            const r = s.rules?.[i.key] || {};
+            const rules = [i.type, r.required ? "required" : "optional", r.max_length ? `max ${r.max_length} chars` : "", r.min != null ? `min ${r.min}` : ""].filter(Boolean).join(" · ");
+            return `<div><code>${esc(i.key)}</code><span class="r">${rules}</span></div>`;
+          }).join("")}</div>
+        </article>`).join("")}</div>
+    </section>
+
+    <footer>${D.live ? "Showing live data from the demo's JSON files." : "Showing a saved sample of the demo data. Open this page from the demo server to see live data."}</footer>`;
+
+  renderDiagram();
+}
+
+function renderDoc(uc, contract) {
+  if (!uc) return "";
+  const values = valuesOf(uc);
+  const user = find("users", uc.user_id);
+  const detail = T("contract_details").find(d => Number(d.user_contract_id) === Number(uc.id));
+  const parts = [uc.main_contract, ...[...(uc.sub_contract || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))].filter(Boolean);
+  return `<div class="doc-grid">
+    <article class="paper">
+      <header>
+        <div><h3>${esc(contract.title_en)}</h3><div class="meta"><span>Contract #${uc.id}</span><span>${esc(user?.name ?? `User #${uc.user_id}`)}</span><span class="pill ${esc(uc.status)}">${esc(uc.status)}</span></div></div>
+        <div class="ar" lang="ar">${esc(contract.title_ar)}</div>
+      </header>
+      ${parts.map((s, i) => `<div class="clause">
+        <span class="no">${i + 1}.</span>
+        <h4>${esc(s.title)} ${s.fixed ? `<span class="pill main">main</span>` : `<span class="pill sub">optional</span>`}</h4>
+        ${ordered(s).map(p => `<p>${fill(p.text, values)}</p>`).join("")}
+      </div>`).join("")}
+      <div class="sign"><div>Contractor signature</div><div>Client signature</div></div>
+    </article>
+    <aside class="side">
+      <div class="panel">
+        <h3>Reporting row <span class="mono" style="color:var(--ink-2);font-weight:400">contract_details${detail ? ` #${detail.id}` : ""}</span></h3>
+        ${detail ? `<dl class="kv">${Object.entries(D.reporting_columns).map(([k, type]) =>
+          `<dt>${esc(k)}</dt>${detail[k] == null ? `<dd class="null">NULL · not selected</dd>` : `<dd>${type === "decimal" ? money(detail[k]) : esc(detail[k])}</dd>`}`).join("")}</dl>`
+          : `<p class="hint">No reporting row saved yet.</p>`}
+      </div>
+      <div class="panel">
+        <h3>Stored JSON <span class="mono" style="color:var(--ink-2);font-weight:400">user_contracts #${uc.id}</span></h3>
+        <details><summary>sub_contract (${plural((uc.sub_contract || []).length, "item")})</summary><pre>${esc(JSON.stringify(uc.sub_contract, null, 2))}</pre></details>
+        <details><summary>main_contract</summary><pre>${esc(JSON.stringify(uc.main_contract, null, 2))}</pre></details>
+      </div>
+    </aside>
+  </div>`;
+}
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-node],[data-clear],[data-doc]");
+  if (!el) return;
+  if (el.dataset.node) { selected = selected === el.dataset.node ? null : el.dataset.node; renderDiagram(); }
+  else if ("clear" in el.dataset) { selected = null; renderDiagram(); }
+  else if (el.dataset.doc) { docId = Number(el.dataset.doc); render(); }
+});
+let resizeTimer;
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => D && renderDiagram(), 120); });
+
+loadData().then(d => { D = d; render(); }).catch(e => {
+  document.getElementById("app").innerHTML = `<p class="lede">Couldn't load the contract data. Open this page from the demo server, for example http://localhost/econtract_demo/showcase.html.</p>`;
+});
+</script>
+</body>
+</html>

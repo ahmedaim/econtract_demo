@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contract Document</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="contract-render.css">
+<style>
+  :root {
+    --desk: #e4e7ea; --paper: #fffffe; --ink: #1b1f24; --ink-2: #555d66; --rule: #c9ced4; --fill: #f1f4f7;
+    --accent: #1d4e6e; --draft: rgba(164, 97, 11, .10);
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --arabic: "IBM Plex Sans Arabic", Tahoma, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--desk); color: var(--ink); font: 14px/1.5 var(--sans); }
+
+  /* toolbar (screen only) */
+  .toolbar { position: sticky; top: 0; z-index: 5; background: #1b2530; color: #dfe6ec; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 20px; font-size: 13px; }
+  .toolbar b { color: #fff; font-weight: 600; }
+  .toolbar label { display: flex; align-items: center; gap: 8px; }
+  .toolbar select { font: inherit; padding: 5px 8px; border-radius: 5px; border: 1px solid #3b4a58; background: #25323f; color: #fff; max-width: 60vw; }
+  .toolbar .right { margin-left: auto; display: flex; gap: 14px; align-items: center; }
+  .toolbar a { color: #9ec1ff; text-decoration: none; }
+  .toolbar button { font: 500 13px var(--sans); background: #fff; color: #1b2530; border: 0; border-radius: 5px; padding: 6px 14px; cursor: pointer; }
+  .toolbar button:focus-visible, .toolbar select:focus-visible, .toolbar a:focus-visible { outline: 2px solid #9ec1ff; outline-offset: 2px; }
+
+  .desk { padding: 32px 16px 64px; }
+  .sheet { position: relative; width: 210mm; max-width: 100%; min-height: 297mm; margin: 0 auto; background: var(--paper); padding: 22mm 20mm 20mm; box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 16px 40px -20px rgba(0,0,0,.35); font: 11.5pt/1.6 var(--serif); overflow: hidden; }
+  @media (max-width: 700px) { .sheet { padding: 28px 20px; min-height: 0; } }
+  .watermark { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; font: 700 120px var(--sans); letter-spacing: .15em; color: var(--draft); transform: rotate(-30deg); }
+
+  /* document header */
+  .doc-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 16px; padding-bottom: 12px; border-bottom: 3px double var(--ink); }
+  .doc-head .en { font: 700 21pt/1.15 var(--serif); }
+  .doc-head .ar { font: 600 19pt/1.3 var(--arabic); direction: rtl; text-align: right; }
+  .doc-head .seal { width: 76px; height: 76px; border: 1.5px solid var(--accent); border-radius: 50%; display: grid; place-items: center; text-align: center; font: 600 7.5pt/1.2 var(--sans); color: var(--accent); letter-spacing: .04em; text-transform: uppercase; }
+  @media (max-width: 700px) { .doc-head { grid-template-columns: 1fr; } .doc-head .seal { display: none; } .doc-head .ar { text-align: left; } }
+
+  .ref { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 20px; margin-top: 10px; font: 9pt var(--sans); color: var(--ink-2); }
+  .ref b { color: var(--ink); font-weight: 600; }
+  .status { text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+
+  h2 { font: 600 9pt var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin: 26px 0 10px; }
+
+  /* parties + summary */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+  .box { border: 1px solid var(--rule); padding: 10px 14px; }
+  .box .role { font: 600 8.5pt var(--sans); color: var(--ink-2); text-transform: uppercase; letter-spacing: .08em; }
+  .box .name { font-weight: 600; font-size: 12.5pt; margin-top: 2px; }
+  .box .line { font-size: 10pt; color: var(--ink-2); }
+  .blank { display: inline-block; min-width: 150px; border-bottom: 1px solid var(--ink-2); height: 1.2em; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+  th, td { text-align: left; padding: 6px 10px; border: 1px solid var(--rule); vertical-align: top; }
+  th { font: 600 8.5pt var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); background: var(--fill); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.muted { color: var(--ink-2); font-style: italic; }
+  td code { font: 9pt Consolas, monospace; color: var(--ink-2); }
+
+  /* articles */
+  .article { margin-top: 18px; break-inside: avoid; }
+  .article h3 { font: 700 12.5pt var(--serif); margin: 0 0 6px; display: flex; gap: 10px; align-items: baseline; }
+  .article h3 .no { font-family: var(--sans); font-size: 9pt; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); min-width: 72px; }
+  .article h3 .tag { margin-left: auto; font: 500 8pt var(--sans); color: var(--ink-2); text-transform: uppercase; letter-spacing: .08em; }
+  .clause { display: grid; grid-template-columns: 38px 1fr; gap: 10px; margin: 4px 0; text-align: justify; hyphens: auto; }
+  .clause .cn { font: 600 10pt var(--sans); color: var(--ink-2); padding-top: 2px; }
+  .val { font-weight: 600; border-bottom: 1px solid var(--ink); padding: 0 2px; }
+  .missing { color: #a4610b; font-style: italic; }
+
+  /* signatures */
+  .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 44px; break-inside: avoid; }
+  @media (max-width: 700px) { .sign { grid-template-columns: 1fr; gap: 28px; } }
+  .sign .sl { height: 54px; border-bottom: 1px solid var(--ink); }
+  .sign .who { font: 600 10pt var(--sans); margin-top: 6px; }
+  .sign .meta { font: 9pt var(--sans); color: var(--ink-2); display: flex; justify-content: space-between; margin-top: 2px; }
+
+  .doc-foot { margin-top: 36px; padding-top: 8px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font: 8.5pt var(--sans); color: var(--ink-2); }
+  .empty { max-width: 560px; margin: 60px auto; background: var(--paper); padding: 28px; font-size: 14px; }
+
+  /* Arabic (right-to-left) documents built from typed templates */
+  .sheet[dir="rtl"] { font: 10.5pt/1.8 var(--arabic); }
+  .sheet[dir="rtl"] * { letter-spacing: 0 !important; }
+  .sheet[dir="rtl"] h2, .sheet[dir="rtl"] th, .sheet[dir="rtl"] .box .role, .sheet[dir="rtl"] .ref, .sheet[dir="rtl"] .sign .who, .sheet[dir="rtl"] .sign .meta, .sheet[dir="rtl"] .doc-foot { font-family: var(--arabic); text-transform: none; }
+  .sheet[dir="rtl"] h2 { font-size: 10.5pt; font-weight: 700; }
+  .doc-head .ar-main { font: 700 20pt/1.35 var(--arabic); }
+  .doc-head .ar-main small { display: block; font-size: 12pt; font-weight: 600; color: var(--ink-2); }
+  .doc-head .en-side { font: 600 13pt/1.3 var(--serif); color: var(--ink-2); text-align: left; }
+  .sheet[dir="rtl"] .watermark { font-family: var(--arabic); font-size: 110px; }
+  .cr-body { margin-top: 26px; }
+  @media (max-width: 700px) { .doc-head .en-side { text-align: right; } }
+
+  @page { size: A4; margin: 0; }
+  @media print {
+    body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .toolbar { display: none; }
+    .desk { padding: 0; }
+    .sheet { box-shadow: none; width: auto; min-height: 0; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <b>Contract document</b>
+  <label for="pick">Saved contract <select id="pick"></select></label>
+  <div class="right">
+    <a href="index.html">Demo</a>
+    <a href="data.html">Data</a>
+    <button type="button" id="printBtn">Print / Save PDF</button>
+  </div>
+</div>
+<div class="desk"><div id="doc"><div class="empty">Loading contract…</div></div></div>
+
+<script src="contract-render.js"></script>
+<script>
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const humanize = k => k.replace(/_/g, " ").replace(/\b(sqm)\b/i, "(m²)").replace(/^\w/, c => c.toUpperCase());
+const money = v => Number(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const ORDINAL = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
+
+let db = null;
+
+function formatValue(input) {
+  if (input.value == null || input.value === "") return null;
+  return input.type === "decimal" && !isNaN(Number(input.value)) ? money(input.value) : String(input.value);
+}
+
+// Snapshot sections in document order: main first, then optional sections by their saved order.
+function partsOf(uc) {
+  return [uc.main_contract, ...[...(uc.sub_contract || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))].filter(Boolean);
+}
+
+function paragraphsOf(part) {
+  const paras = part.paragraphs || [];
+  return (part.paragraph_order || paras.map(p => p.id)).map(id => paras.find(p => p.id === id)).filter(Boolean);
+}
+
+function fillText(text, inputs) {
+  return esc(text).replace(/\{\{(\w+)\}\}/g, (_, k) => {
+    const input = inputs.find(i => i.key === k);
+    const v = input && formatValue(input);
+    return v != null ? `<span class="val">${esc(v)}</span>` : `<span class="missing">[${esc(humanize(k))}]</span>`;
+  });
+}
+
+// Arabic contracts built from typed templates (articles, tables, generated scope/spec/warranty blocks).
+function renderTypedDoc(uc) {
+  const CR = window.ContractRender;
+  const main = db.contract_sections.find(s => s.id === uc.contract_section_id);
+  const contract = db.contracts.find(c => c.id === main?.contract_id) || { id: "", title_en: "", title_ar: "" };
+  const user = db.users.find(u => u.id === uc.user_id);
+  const detail = db.contract_details.find(d => d.user_contract_id === uc.id);
+  const parts = partsOf(uc);
+  const values = CR.valuesOf(parts);
+  const no = `EC-${String(uc.id).padStart(6, "0")}`;
+  const supplier = uc.main_contract.inputs.find(i => i.type === "choice");
+  const supplierLabel = supplier?.options.find(o => o.value === supplier.value)?.label;
+  const status = { draft: "مسودة", submitted: "مقدَّم" }[uc.status] ?? uc.status;
+  const date = "التاريخ: ____ / ____ / ______";
+
+  document.title = `${contract.title_ar} ${no}`;
+
+  return `<article class="sheet" dir="rtl" lang="ar">
+    ${uc.status === "draft" ? `<div class="watermark" aria-hidden="true">مسودة</div>` : ""}
+
+    <header class="doc-head">
+      <div class="ar-main">${esc(contract.title_ar)}<small>${esc(uc.main_contract.title)}</small></div>
+      <div class="seal">e-<br>Contract</div>
+      <div class="en-side" dir="ltr">${esc(contract.title_en)}</div>
+    </header>
+    <div class="ref">
+      <span>رقم العقد <b dir="ltr">${no}</b></span>
+      <span>النموذج <b>#${esc(contract.id)}</b> · القسم الرئيسي <b>#${esc(uc.contract_section_id)}</b></span>
+      <span>الحالة <b>${esc(status)}</b></span>
+    </div>
+
+    <h2>الأطراف</h2>
+    <div class="grid2">
+      <div class="box">
+        <div class="role">الطرف الأول (المالك)</div>
+        <div class="name"><span class="blank"></span></div>
+        <div class="line">يُستكمل الاسم والعنوان عند التوقيع</div>
+      </div>
+      <div class="box">
+        <div class="role">الطرف الثاني (المقاول)</div>
+        <div class="name">${esc(user?.name ?? `مستخدم #${uc.user_id}`)}</div>
+        <div class="line" dir="ltr" style="text-align:right">${esc(user?.email ?? "")}</div>
+        <div class="line">رقم المقاول ${esc(uc.user_id)}</div>
+      </div>
+    </div>
+
+    <h2>ملخص العقد</h2>
+    <table>
+      <tbody>
+        ${values.contract_value ? `<tr><th style="width:38%">قيمة العقد</th><td>${esc(CR.formatNumber(values.contract_value, { money: true }))} ريال</td></tr>` : ""}
+        ${supplierLabel ? `<tr><th>توريد المواد مسؤولية</th><td>${esc(supplierLabel)}</td></tr>` : ""}
+        <tr><th>أقسام الأعمال المختارة</th><td>${parts.slice(1).map(p => esc(p.title)).join("، ") || "لا يوجد"}</td></tr>
+      </tbody>
+    </table>
+
+    <div class="cr-body">${CR.renderBody(parts)}</div>
+
+    <section class="sign">
+      <div><div class="sl"></div><div class="who">عن الطرف الأول (المالك)</div><div class="meta"><span>&nbsp;</span><span>${date}</span></div></div>
+      <div><div class="sl"></div><div class="who">عن الطرف الثاني (المقاول)</div><div class="meta"><span>${esc(user?.name ?? "")}</span><span>${date}</span></div></div>
+    </section>
+
+    <footer class="doc-foot">
+      <span dir="ltr">${no} · ${parts.map(p => `${esc(p.section_key)} v${esc(p.version)}`).join(" · ")}</span>
+      <span>${detail ? `سجل التقارير #${detail.id}` : "لا يوجد سجل تقارير"}</span>
+    </footer>
+  </article>`;
+}
+
+function renderDoc(uc) {
+  if (window.ContractRender.isTyped(uc.main_contract)) return renderTypedDoc(uc);
+  const main = db.contract_sections.find(s => s.id === uc.contract_section_id);
+  const contract = db.contracts.find(c => c.id === main?.contract_id) || { title_en: "Contract", title_ar: "" };
+  const user = db.users.find(u => u.id === uc.user_id);
+  const detail = db.contract_details.find(d => d.user_contract_id === uc.id);
+  const parts = partsOf(uc);
+  const allInputs = parts.flatMap(p => (p.inputs || []).map(i => ({ ...i, section: p.title })));
+  const byKey = k => allInputs.find(i => i.key === k);
+  const valueInput = allInputs.find(i => i.type === "decimal" && /value|amount|price/.test(i.key));
+  const projectInput = allInputs.find(i => /project/.test(i.key));
+
+  document.title = `${contract.title_en} #${uc.id}`;
+
+  return `<article class="sheet">
+    ${uc.status === "draft" ? `<div class="watermark" aria-hidden="true">DRAFT</div>` : ""}
+
+    <header class="doc-head">
+      <div class="en">${esc(contract.title_en)}</div>
+      <div class="seal">e-<br>Contract</div>
+      <div class="ar" lang="ar">${esc(contract.title_ar)}</div>
+    </header>
+    <div class="ref">
+      <span>Contract No. <b>EC-${String(uc.id).padStart(6, "0")}</b></span>
+      <span>Template <b>#${esc(contract.id)}</b> · main section <b>#${esc(uc.contract_section_id)}</b></span>
+      <span>Status <b class="status">${esc(uc.status)}</b></span>
+    </div>
+
+    <h2>Parties</h2>
+    <div class="grid2">
+      <div class="box">
+        <div class="role">Contractor</div>
+        <div class="name">${esc(user?.name ?? `User #${uc.user_id}`)}</div>
+        <div class="line">${esc(user?.email ?? "")}</div>
+        <div class="line">Contractor ID ${esc(uc.user_id)}</div>
+      </div>
+      <div class="box">
+        <div class="role">Employer</div>
+        <div class="name"><span class="blank"></span></div>
+        <div class="line">Name and address to be completed on signing</div>
+      </div>
+    </div>
+
+    <h2>Contract summary</h2>
+    <table>
+      <tbody>
+        ${projectInput ? `<tr><th style="width:38%">Project</th><td>${esc(formatValue(projectInput) ?? "—")}</td></tr>` : ""}
+        ${valueInput ? `<tr><th>Total contract value</th><td>SAR ${esc(formatValue(valueInput) ?? "—")}</td></tr>` : ""}
+        <tr><th>Sections included</th><td>${parts.map(p => esc(p.title)).join(", ")}</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Terms and conditions</h2>
+    ${parts.map((p, i) => `<section class="article">
+      <h3><span class="no">Article ${ORDINAL[i] ?? i + 1}</span>${esc(p.title)}<span class="tag">${p.fixed ? "Main · fixed" : "Optional"}</span></h3>
+      ${paragraphsOf(p).map((para, j) => `<div class="clause"><span class="cn">${i + 1}.${j + 1}</span><p style="margin:0">${fillText(para.text, p.inputs || [])}</p></div>`).join("")}
+    </section>`).join("")}
+
+    <h2>Schedule A · Entered particulars</h2>
+    <table>
+      <thead><tr><th>Particular</th><th>Value</th><th>Article</th></tr></thead>
+      <tbody>${allInputs.map(inp => {
+        const v = formatValue(inp);
+        return `<tr><td>${esc(humanize(inp.key))}</td>${v == null ? `<td class="muted">not provided</td>` : `<td class="${inp.type === "decimal" ? "num" : ""}">${esc(v)}</td>`}<td>${esc(inp.section)}</td></tr>`;
+      }).join("")}</tbody>
+    </table>
+
+    <section class="sign">
+      <div><div class="sl"></div><div class="who">For the Contractor</div><div class="meta"><span>${esc(user?.name ?? "")}</span><span>Date: ____ / ____ / ______</span></div></div>
+      <div><div class="sl"></div><div class="who">For the Employer</div><div class="meta"><span>&nbsp;</span><span>Date: ____ / ____ / ______</span></div></div>
+    </section>
+
+    <footer class="doc-foot">
+      <span>EC-${String(uc.id).padStart(6, "0")} · ${parts.map(p => `${esc(p.section_key)} v${esc(p.version)}`).join(" · ")}</span>
+      <span>${detail ? `Reporting record #${detail.id}` : "No reporting record"}</span>
+    </footer>
+  </article>`;
+}
+
+function show(id) {
+  const uc = db.user_contracts.find(u => u.id === id);
+  document.getElementById("doc").innerHTML = uc ? renderDoc(uc)
+    : `<div class="empty">No saved contract with id ${esc(id)}. Fill one in on the <a href="index.html">demo page</a>.</div>`;
+  const url = new URL(location.href);
+  url.searchParams.set("id", id);
+  history.replaceState(null, "", url);
+}
+
+document.getElementById("pick").addEventListener("change", e => show(Number(e.target.value)));
+document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+fetch("api.php", { cache: "no-store" })
+  .then(r => { if (!r.ok) throw new Error(`api.php returned ${r.status}`); return r.json(); })
+  .then(data => {
+    db = data.tables;
+    const list = db.user_contracts;
+    if (!list.length) {
+      document.getElementById("doc").innerHTML = `<div class="empty">No saved contracts yet. Fill one in on the <a href="index.html">demo page</a>.</div>`;
+      return;
+    }
+    const wanted = Number(new URLSearchParams(location.search).get("id")) || list[0].id;
+    document.getElementById("pick").innerHTML = list.map(u => {
+      const user = db.users.find(x => x.id === u.user_id);
+      return `<option value="${u.id}" ${u.id === wanted ? "selected" : ""}>EC-${String(u.id).padStart(6, "0")} · ${esc(user?.name ?? "")} · ${esc(u.status)}</option>`;
+    }).join("");
+    show(wanted);
+  })
+  .catch(e => {
+    document.getElementById("doc").innerHTML = `<div class="empty"><b>Couldn't load the contract.</b><p>${esc(e.message)}. Open this page through Apache, e.g. http://localhost/econtract_demo/contract.html.</p></div>`;
+  });
+</script>
+</body>
+</html>

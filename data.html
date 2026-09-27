@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eContract Data</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #fff; --text: #1d2330; --muted: #6b7280; --line: #e3e6eb;
+    --accent: #1f6feb; --accent-soft: #e8f0fe; --code: #0f172a; --json: #7c3aed; --err: #cf222e; --ok: #1a7f37;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; background: var(--bg); color: var(--text); }
+  header { background: var(--code); color: #fff; padding: 14px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  header h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  header nav { margin-left: auto; display: flex; gap: 16px; font-size: 13px; }
+  header a { color: #9ec1ff; text-decoration: none; }
+  main { max-width: 1260px; margin: 0 auto; padding: 24px; }
+  @media (max-width: 700px) { main { padding: 16px; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 15px; margin: 0 0 4px; }
+  .muted { color: var(--muted); }
+  .bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .bar .right { margin-left: auto; display: flex; gap: 8px; }
+  .btn { border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 6px; padding: 7px 14px; font: inherit; cursor: pointer; }
+  .btn.ghost { background: #fff; color: var(--accent); }
+  .btn.danger { border-color: var(--err); background: #fff; color: var(--err); }
+  .btn.small { font-size: 12px; padding: 3px 9px; }
+
+  /* ---- relations diagram ---- */
+  .scroll { overflow-x: auto; }
+  #diagram { position: relative; display: grid; grid-template-columns: repeat(4, 230px); column-gap: 80px; min-width: 1160px; padding: 4px 4px 12px; }
+  #diagram svg { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+  .dcol { display: flex; flex-direction: column; gap: 10px; }
+  .gtitle { font: 600 12px Consolas, monospace; color: var(--muted); margin-top: 6px; }
+  .gtitle:first-child { margin-top: 0; }
+  .node { position: relative; z-index: 1; background: #fff; border: 1px solid #cfd5dd; border-left: 4px solid var(--c); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; transition: opacity .15s, box-shadow .15s; }
+  .node:hover { box-shadow: 0 1px 6px rgba(0,0,0,.12); }
+  .node b { font-family: Consolas, monospace; }
+  .node .sub { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .node.sel { box-shadow: 0 0 0 3px var(--accent-soft); border-color: var(--accent); border-left-color: var(--c); }
+  .node.broken { border-color: var(--err); }
+  .node .bad { color: var(--err); font-size: 11px; }
+  .empty-node { font-size: 12px; color: var(--muted); font-style: italic; }
+  path.edge { fill: none; stroke: #94a3b8; stroke-width: 1.5; transition: opacity .15s; }
+  path.edge.json { stroke: var(--json); stroke-dasharray: 5 4; }
+  path.edge.on { stroke: var(--accent); stroke-width: 2.2; }
+  path.edge.json.on { stroke: var(--json); }
+  .dim { opacity: .2; }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { display: inline-block; width: 26px; border-top: 2px solid #94a3b8; }
+  .sw.json { border-top: 2px dashed var(--json); }
+
+  /* ---- editor ---- */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 14px; overflow-x: auto; }
+  .tabs button { border: 0; background: none; padding: 9px 12px; font: 13px Consolas, monospace; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tabs button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+  .tabs .count { font: 11px system-ui; background: #eef1f4; border-radius: 8px; padding: 0 6px; margin-left: 4px; }
+  .editor { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  @media (max-width: 960px) { .editor { grid-template-columns: 1fr; } }
+  .table-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  th, td { border: 1px solid var(--line); padding: 5px 8px; text-align: left; vertical-align: top; }
+  th { background: #f0f2f5; font-family: Consolas, monospace; white-space: nowrap; }
+  td.null { color: var(--muted); font-style: italic; }
+  td.js { color: var(--json); font-family: Consolas, monospace; white-space: nowrap; }
+  tr.sel td { background: var(--accent-soft); }
+  form label { display: block; margin-bottom: 10px; }
+  form label > span { display: block; font: 12px Consolas, monospace; color: var(--muted); margin-bottom: 3px; }
+  form label > span em { font: italic 11px system-ui; }
+  input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 5px; font: inherit; background: #fff; }
+  textarea { font: 12px/1.45 Consolas, monospace; min-height: 110px; resize: vertical; }
+  input:disabled { background: #f3f4f6; color: var(--muted); }
+  .form-title { font-weight: 600; margin-bottom: 10px; }
+  .msg { padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; }
+  .msg.err { background: #fdecee; color: var(--err); border: 1px solid #f5c2c7; }
+  .msg.ok { background: #e7f5ea; color: var(--ok); border: 1px solid #bfe3c7; }
+  .fatal { padding: 20px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>eContract Data</h1>
+  <span style="color:#9aa4b2;font-size:13px">JSON-file tables · record relations</span>
+  <nav><a href="showcase.html">Client showcase</a><a href="index.html">Demo</a><a href="erd.html">Schema diagram</a></nav>
+</header>
+<main id="app"><div class="card muted">Loading…</div></main>
+
+<script>
+const API = "api.php";
+
+// Diagram layout: four columns, left = referenced, right = referencing.
+const LAYOUT = [["contracts"], ["contract_sections", "users"], ["user_contracts"], ["contract_details"]];
+const COLORS = { contracts: "#9a5b00", contract_sections: "#1f6feb", users: "#64748b", user_contracts: "#1a7f37", contract_details: "#7c3aed" };
+
+let schema = {}, tables = {}, reportCols = {};
+let state = { tab: "contracts", editId: null, selected: null, msg: null };
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nodeKey = (t, id) => `${t}:${id}`;
+const byId = (t, id) => (tables[t] || []).find(r => Number(r.id) === Number(id));
+
+async function load() {
+  const res = await fetch(API, { cache: "no-store" });
+  if (!res.ok) throw new Error(`api.php returned ${res.status}`);
+  const data = await res.json();
+  ({ schema, tables } = data);
+  reportCols = data.reporting_columns;
+}
+
+async function call(body) {
+  const res = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+  if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+/* ---------------- relations ---------------- */
+
+// Short, human label for a record node.
+function describe(t, r) {
+  switch (t) {
+    case "contracts": return [r.title_en, r.title_ar];
+    case "users": return [r.name, r.email];
+    case "contract_sections": return [`${r.type} · ${r.template_structure?.section_key ?? "?"} v${r.template_structure?.version ?? "?"}`, r.template?.title];
+    case "user_contracts": {
+      const subs = Array.isArray(r.sub_contract) ? r.sub_contract.length : 0;
+      return [`${r.status} · ${subs} sub-section${subs === 1 ? "" : "s"}`, r.main_contract?.title];
+    }
+    case "contract_details": {
+      const vals = Object.keys(reportCols).filter(k => r[k] != null && typeof r[k] !== "object").map(k => `${k}=${r[k]}`);
+      return [vals.slice(0, 2).join(", ") || "no values", vals.slice(2).join(", ")];
+    }
+  }
+  return ["", ""];
+}
+
+// Every link between records: FK columns (solid) and ids stored inside JSON columns (dashed).
+function links() {
+  const out = [];
+  for (const [t, def] of Object.entries(schema)) {
+    for (const r of tables[t] || []) {
+      for (const c of def.columns.filter(c => c.type === "fk")) {
+        if (r[c.name] != null) out.push({ from: nodeKey(t, r.id), to: nodeKey(c.ref, r[c.name]), toT: c.ref, toId: r[c.name], via: c.name, json: false });
+      }
+      for (const ref of def.json_refs || []) {
+        const v = r[ref.column];
+        const items = Array.isArray(v) ? v : v && typeof v === "object" ? [v] : [];
+        for (const it of items) {
+          const id = it?.[ref.key];
+          if (id == null) continue;
+          // Skip the JSON ref when it duplicates an FK already drawn (main_contract → main section).
+          if (out.some(l => l.from === nodeKey(t, r.id) && l.to === nodeKey(ref.ref, id))) continue;
+          out.push({ from: nodeKey(t, r.id), to: nodeKey(ref.ref, id), toT: ref.ref, toId: id, via: `${ref.column}.${ref.key}`, json: true });
+        }
+      }
+    }
+  }
+  return out;
+}
+
+// Records reachable upstream (what it points to) and downstream (what points to it).
+function chain(key, all) {
+  const seen = new Set([key]);
+  const walk = (start, dir) => {
+    const stack = [start];
+    while (stack.length) {
+      const k = stack.pop();
+      for (const l of all) {
+        const [a, b] = dir === "up" ? [l.from, l.to] : [l.to, l.from];
+        if (a === k && !seen.has(b)) { seen.add(b); stack.push(b); }
+      }
+    }
+  };
+  walk(key, "up");
+  walk(key, "down");
+  return seen;
+}
+
+function renderDiagram() {
+  const all = links();
+  const active = state.selected ? chain(state.selected, all) : null;
+
+  const cols = LAYOUT.map(group => `<div class="dcol">${group.map(t => `
+      <div class="gtitle">${t} (${(tables[t] || []).length})</div>
+      ${(tables[t] || []).map(r => {
+        const k = nodeKey(t, r.id);
+        const [line1, line2] = describe(t, r);
+        const broken = all.filter(l => l.from === k && !byId(l.toT, l.toId));
+        return `<div class="node ${state.selected === k ? "sel" : ""} ${active && !active.has(k) ? "dim" : ""} ${broken.length ? "broken" : ""}"
+                     style="--c:${COLORS[t]}" data-node="${k}" title="Click to trace relations and edit">
+          <div><b>#${esc(r.id)}</b> ${esc(line1)}</div>
+          ${line2 ? `<div class="sub">${esc(line2)}</div>` : ""}
+          ${broken.map(l => `<div class="bad">✕ ${esc(l.via)} → ${esc(l.toT)} #${esc(l.toId)} missing</div>`).join("")}
+        </div>`;
+      }).join("") || `<div class="empty-node">no rows</div>`}`).join("")}</div>`).join("");
+
+  document.getElementById("diagram").innerHTML = `<svg></svg>${cols}`;
+  requestAnimationFrame(() => drawEdges(all, active));
+}
+
+function drawEdges(all, active) {
+  const box = document.getElementById("diagram");
+  const svg = box.querySelector("svg");
+  if (!svg) return;
+  const base = box.getBoundingClientRect();
+  svg.setAttribute("width", box.scrollWidth);
+  svg.setAttribute("height", box.scrollHeight);
+  svg.innerHTML = all.map(l => {
+    const a = box.querySelector(`[data-node="${l.from}"]`), b = box.querySelector(`[data-node="${l.to}"]`);
+    if (!a || !b) return "";
+    const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+    const x1 = ra.left - base.left, y1 = ra.top - base.top + ra.height / 2;
+    const x2 = rb.right - base.left, y2 = rb.top - base.top + rb.height / 2;
+    const m = (x1 + x2) / 2;
+    const on = active && active.has(l.from) && active.has(l.to);
+    return `<path class="edge ${l.json ? "json" : ""} ${on ? "on" : ""} ${active && !on ? "dim" : ""}"
+      d="M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}"><title>${esc(l.from)} ${esc(l.via)} → ${esc(l.to)}</title></path>`;
+  }).join("");
+}
+
+/* ---------------- editor ---------------- */
+
+// Columns shown for a table: schema columns + reporting columns for contract_details.
+function columnsOf(t) {
+  const cols = [...schema[t].columns];
+  if (schema[t].reporting_columns) {
+    for (const [key, type] of Object.entries(reportCols)) cols.push({ name: key, type: type === "decimal" ? "decimal" : type === "table" || type === "multi" ? "json" : "string", reporting: true });
+  }
+  return cols;
+}
+
+function cellHtml(c, v) {
+  if (v === null || v === undefined) return `<td class="null">NULL</td>`;
+  if (c.type === "json") {
+    const summary = Array.isArray(v) ? `[${v.length}]` : `{${Object.keys(v).length}}`;
+    return `<td class="js" title="${esc(JSON.stringify(v, null, 2))}">${summary}</td>`;
+  }
+  return `<td>${esc(v)}</td>`;
+}
+
+function optionLabel(t, r) {
+  const [a] = describe(t, r);
+  return `#${r.id} ${a ?? ""}`;
+}
+
+function fieldHtml(c, row, editing) {
+  const v = row ? row[c.name] : undefined;
+  const hint = c.type === "fk" ? `→ ${c.ref}.id` : c.type === "json" ? "JSON" : c.reporting ? `reporting · ${c.type}` : c.type;
+  const req = c.required ? " · required" : "";
+  const label = `<span>${c.name} <em>${hint}${req}</em></span>`;
+  switch (c.type) {
+    case "pk":
+      return `<label>${label}<input name="${c.name}" type="number" value="${esc(v ?? "")}" placeholder="auto" ${editing ? "disabled" : ""}></label>`;
+    case "fk":
+      return `<label>${label}<select name="${c.name}"><option value="">— none —</option>
+        ${(tables[c.ref] || []).map(r => `<option value="${r.id}" ${Number(v) === Number(r.id) ? "selected" : ""}>${esc(optionLabel(c.ref, r))}</option>`).join("")}
+      </select></label>`;
+    case "enum":
+      return `<label>${label}<select name="${c.name}">${c.values.map(x => `<option ${v === x ? "selected" : ""}>${x}</option>`).join("")}</select></label>`;
+    case "json":
+      return `<label>${label}<textarea name="${c.name}" spellcheck="false">${esc(JSON.stringify(v !== undefined && v !== null ? v : c.reporting ? null : c.default ?? {}, null, 2))}</textarea></label>`;
+    case "decimal":
+      return `<label>${label}<input name="${c.name}" type="number" step="0.01" value="${esc(v ?? "")}"></label>`;
+    default:
+      return `<label>${label}<input name="${c.name}" type="text" value="${esc(v ?? "")}"></label>`;
+  }
+}
+
+function renderEditor() {
+  const t = state.tab;
+  const cols = columnsOf(t);
+  const rows = tables[t] || [];
+  const row = state.editId != null ? byId(t, state.editId) : null;
+
+  document.getElementById("editor").innerHTML = `
+    <div class="tabs">${Object.keys(schema).map(k =>
+      `<button class="${k === t ? "active" : ""}" data-tab="${k}">${k}<span class="count">${(tables[k] || []).length}</span></button>`).join("")}</div>
+    ${state.msg ? `<div class="msg ${state.msg.type}">${esc(state.msg.text)}</div>` : ""}
+    <div class="editor">
+      <div class="table-wrap"><table>
+        <thead><tr>${cols.map(c => `<th>${c.name}</th>`).join("")}<th></th></tr></thead>
+        <tbody>${rows.length ? rows.map(r => `<tr class="${row && row.id === r.id ? "sel" : ""}">
+            ${cols.map(c => cellHtml(c, r[c.name])).join("")}
+            <td style="white-space:nowrap"><button class="btn ghost small" data-edit="${r.id}">Edit</button>
+              <button class="btn danger small" data-del="${r.id}">Delete</button></td></tr>`).join("")
+          : `<tr><td colspan="${cols.length + 1}" class="null">no rows</td></tr>`}</tbody>
+      </table></div>
+      <form id="rowForm" autocomplete="off">
+        <div class="form-title">${row ? `Edit ${t} #${row.id}` : `Add row to ${t}`}</div>
+        ${cols.map(c => fieldHtml(c, row, !!row)).join("")}
+        <div style="display:flex;gap:8px">
+          <button class="btn" type="submit">${row ? "Save changes" : "Add row"}</button>
+          ${row ? `<button class="btn ghost" type="button" data-cancel>Cancel</button>` : ""}
+        </div>
+      </form>
+    </div>`;
+}
+
+function render() {
+  renderDiagram();
+  renderEditor();
+}
+
+/* ---------------- actions ---------------- */
+
+async function refresh(msg) {
+  await load();
+  state.msg = msg || null;
+  render();
+}
+
+async function submitForm(form) {
+  const t = state.tab;
+  const row = {};
+  for (const c of columnsOf(t)) {
+    const el = form.elements[c.name];
+    if (!el) continue;
+    if (c.type === "json") {
+      try { row[c.name] = JSON.parse(el.value); }
+      catch (e) { state.msg = { type: "err", text: `${c.name}: invalid JSON — ${e.message}` }; renderEditor(); return; }
+    } else {
+      row[c.name] = el.value;
+    }
+  }
+  if (state.editId != null) row.id = state.editId;
+  try {
+    const res = await call({ action: "upsert", table: t, row });
+    state.editId = res.row.id;
+    state.selected = nodeKey(t, res.row.id);
+    await refresh({ type: "ok", text: `${res.created ? "Added" : "Updated"} ${t} #${res.row.id}.` });
+  } catch (e) {
+    state.msg = { type: "err", text: e.message };
+    renderEditor();
+  }
+}
+
+document.addEventListener("click", async e => {
+  const el = e.target.closest("[data-tab],[data-edit],[data-del],[data-cancel],[data-node],[data-reset],[data-clear]");
+  if (!el) return;
+  const d = el.dataset;
+  if (d.tab) { state.tab = d.tab; state.editId = null; state.msg = null; renderEditor(); }
+  else if (d.edit) { state.editId = Number(d.edit); state.selected = nodeKey(state.tab, d.edit); state.msg = null; render(); }
+  else if ("cancel" in d) { state.editId = null; state.msg = null; renderEditor(); }
+  else if ("clear" in d) { state.selected = null; renderDiagram(); }
+  else if (d.node) {
+    const [t, id] = d.node.split(":");
+    const same = state.selected === d.node;
+    state.selected = same ? null : d.node;
+    state.tab = t; state.editId = same ? null : Number(id); state.msg = null;
+    render();
+    if (!same) document.getElementById("editor").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  else if (d.del) {
+    if (!confirm(`Delete ${state.tab} #${d.del}?`)) return;
+    try {
+      await call({ action: "delete", table: state.tab, id: Number(d.del) });
+      if (state.editId === Number(d.del)) state.editId = null;
+      if (state.selected === nodeKey(state.tab, d.del)) state.selected = null;
+      await refresh({ type: "ok", text: `Deleted ${state.tab} #${d.del}.` });
+    } catch (err) { state.msg = { type: "err", text: err.message }; renderEditor(); }
+  }
+  else if ("reset" in d) {
+    if (!confirm("Restore all tables from data/seed?")) return;
+    await call({ action: "reset" });
+    state = { tab: state.tab, editId: null, selected: null, msg: null };
+    await refresh({ type: "ok", text: "All tables restored from seed." });
+  }
+});
+
+document.addEventListener("submit", e => {
+  if (e.target.id !== "rowForm") return;
+  e.preventDefault();
+  submitForm(e.target);
+});
+
+window.addEventListener("resize", () => { if (Object.keys(schema).length) renderDiagram(); });
+
+(async () => {
+  document.getElementById("app").innerHTML = `
+    <div class="card">
+      <div class="bar">
+        <div><h2>Record relations</h2><div class="muted" style="font-size:13px">Click a record to trace everything it points to and everything that points to it.</div></div>
+        <div class="right"><button class="btn ghost small" data-clear>Clear selection</button></div>
+      </div>
+      <div class="legend" style="margin-bottom:12px">
+        <span><span class="sw"></span> foreign key column</span>
+        <span><span class="sw json"></span> id stored inside JSON (sub_contract[].source_section_id)</span>
+        <span style="color:var(--err)">✕ red = reference to a row that doesn't exist</span>
+      </div>
+      <div class="scroll"><div id="diagram"></div></div>
+    </div>
+    <div class="card" id="editor"></div>
+    <div class="bar"><div class="muted" style="font-size:12px">Stored in <code>data/*.json</code> via <code>api.php</code>.</div>
+      <div class="right"><button class="btn danger small" data-reset>Reset from seed</button></div></div>`;
+  try {
+    await load();
+    render();
+  } catch (e) {
+    document.getElementById("app").innerHTML = `<div class="card fatal"><b>Could not reach api.php.</b>
+      <p class="muted">${esc(e.message)}. Open this page through Apache, e.g. <code>http://localhost/econtract_demo/data.html</code>, not as a file.</p></div>`;
+  }
+})();
+</script>
+</body>
+</html>

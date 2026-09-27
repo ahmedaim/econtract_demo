@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eContract Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="contract-render.css">
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #fff; --text: #1d2330; --muted: #6b7280; --line: #e3e6eb;
+    --accent: #1f6feb; --accent-soft: #e8f0fe; --ok: #1a7f37; --err: #cf222e; --code: #0f172a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; background: var(--bg); color: var(--text); }
+  header { background: var(--code); color: #fff; padding: 14px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  header h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  header .who { margin-left: auto; font-size: 13px; opacity: .8; }
+  nav { display: flex; gap: 4px; padding: 0 24px; background: #fff; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  nav button { border: 0; background: none; padding: 12px 14px; font: inherit; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  main { max-width: 1400px; margin: 0 auto; padding: 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 15px; margin: 0 0 12px; }
+  .card h3 { font-size: 14px; margin: 0 0 8px; }
+  .muted { color: var(--muted); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } main { padding: 16px; } }
+  .contract-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .contract-row:first-of-type { border-top: 0; }
+  .ar { font-family: "IBM Plex Sans Arabic", Tahoma, "Segoe UI", sans-serif; direction: rtl; }
+  [dir="rtl"] { font-family: "IBM Plex Sans Arabic", Tahoma, "Segoe UI", sans-serif; }
+  .btn { border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 6px; padding: 7px 14px; font: inherit; cursor: pointer; }
+  .btn.ghost { background: #fff; color: var(--accent); }
+  .btn.danger { border-color: var(--err); background: #fff; color: var(--err); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .section { border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; margin-bottom: 12px; }
+  .section.off { background: #fafbfc; }
+  .section-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .section-head .end { margin-inline-start: auto; }
+  .tag { font-size: 11px; padding: 1px 7px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .tag.fixed { background: #fff4e5; color: #9a5b00; }
+  .tag.st { background: #eef1f4; color: #444; }
+  .field { display: block; margin-top: 12px; }
+  .field > span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .field > span b { color: var(--text); font-weight: 600; }
+  .field > span code { color: var(--text); font-size: 11px; }
+  input[type=text], input[type=number], input[type=date], select, textarea { width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 5px; font: inherit; background: #fff; }
+  textarea { resize: vertical; min-height: 64px; }
+  .invalid, input.invalid, textarea.invalid { border-color: var(--err); }
+  .err { color: var(--err); font-size: 12px; margin-top: 4px; }
+  .choices, .multi { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .multi { flex-direction: column; gap: 4px; }
+  .choice { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  table.edit { font-size: 12px; }
+  table.edit th, table.edit td { padding: 4px; }
+  table.edit input, table.edit select { padding: 5px 6px; min-width: 90px; }
+  table.edit td.n { text-align: center; color: var(--muted); }
+  table.edit td.comp { text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; background: #f6f8fa; }
+  .field > .btn { margin-top: 6px; }
+  .preview h3 { margin-top: 14px; }
+  .preview p { margin: 4px 0 0; }
+  .doc-scroll { max-height: 78vh; overflow: auto; padding-inline-end: 6px; }
+  .ph { background: #fff4e5; color: #9a5b00; border-radius: 3px; padding: 0 3px; }
+  .val { background: var(--accent-soft); border-radius: 3px; padding: 0 3px; }
+  pre { background: var(--code); color: #d6e2ff; padding: 12px 14px; border-radius: 6px; overflow: auto; font: 12px/1.45 Consolas, monospace; margin: 0; max-height: 520px; direction: ltr; text-align: left; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { border: 1px solid var(--line); padding: 6px 9px; text-align: start; vertical-align: top; }
+  th { background: #f0f2f5; font-weight: 600; }
+  td.null { color: var(--muted); font-style: italic; }
+  .table-wrap { overflow-x: auto; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .flash { padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; background: #e7f5ea; color: var(--ok); border: 1px solid #bfe3c7; }
+  .flash.bad { background: #fdecee; color: var(--err); border-color: #f5c2c7; }
+  .row-actions { display: flex; gap: 6px; }
+  .small { font-size: 12px; padding: 4px 10px; }
+  details summary { cursor: pointer; color: var(--accent); }
+  details[open] summary { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>eContract Demo</h1>
+  <span class="muted" style="color:#9aa4b2">contracts → contract_sections → user_contracts → contract_details</span>
+  <span class="who"><a href="showcase.html" style="color:#9ec1ff;text-decoration:none;margin-right:16px">Client showcase →</a><a href="data.html" style="color:#9ec1ff;text-decoration:none;margin-right:16px">Data &amp; relations →</a><a href="erd.html" style="color:#9ec1ff;text-decoration:none;margin-right:16px">Schema diagram →</a>Logged in as contractor <b>#501</b></span>
+</header>
+<nav id="tabs"></nav>
+<main id="app"></main>
+
+<script src="contract-render.js"></script>
+<script>
+/* ------------------------------------------------------------------
+ * Data lives in data/*.json and is read/written through api.php.
+ * Seed data is in data/seed/. Rendering and snapshots come from contract-render.js.
+ * ------------------------------------------------------------------ */
+const API = "api.php";
+const USER_ID = 501;
+const CR = window.ContractRender;
+
+let db = { contracts: [], contract_sections: [], user_contracts: [], contract_details: [] };
+let view = { tab: "index", contractId: null, editId: null, form: null, errors: {}, flash: null };
+
+async function load() {
+  const res = await fetch(API, { cache: "no-store" });
+  if (!res.ok) throw new Error(`api.php returned ${res.status}`);
+  db = (await res.json()).tables;
+}
+async function call(body) {
+  const res = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+  if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+/* ---------------- helpers ---------------- */
+const esc = CR.esc;
+const json = o => esc(JSON.stringify(o, null, 2));
+const sectionsOf = cid => db.contract_sections.filter(s => s.contract_id === cid && s.status === "active");
+const mainOf = cid => sectionsOf(cid).find(s => s.type === "main");
+const subsOf = cid => sectionsOf(cid).filter(s => s.type === "sub");
+const inputsOf = s => s.template_structure.inputs;
+const isRtl = s => s?.template_structure?.dir === "rtl";
+const allInputs = () => Object.fromEntries(db.contract_sections.flatMap(s => inputsOf(s).map(i => [i.key, i])));
+
+// Every input key across all sections becomes a reporting column in contract_details.
+function reportingColumns() {
+  const cols = [];
+  for (const s of db.contract_sections) {
+    for (const inp of inputsOf(s)) {
+      if (cols.some(c => c.key === inp.key)) continue;
+      const r = s.rules[inp.key] || {};
+      const sqlType = inp.type === "decimal" ? "DECIMAL(15,2)"
+        : inp.type === "table" || inp.type === "multi" ? "JSON"
+        : inp.type === "textarea" ? "TEXT"
+        : inp.type === "choice" ? "VARCHAR(50)"
+        : `VARCHAR(${r.max_length || 255})`;
+      cols.push({ key: inp.key, sqlType, nullable: s.type === "sub" || !(r.required || inp.required) });
+    }
+  }
+  return cols;
+}
+
+function validateSection(section, values) {
+  const errs = {};
+  const m = (en, ar) => (isRtl(section) ? ar : en);
+  for (const inp of inputsOf(section)) {
+    const r = section.rules[inp.key] || {};
+    const required = r.required || inp.required;
+    const v = values[inp.key];
+    if (inp.type === "table") {
+      const rows = CR.normalizeValue(inp, v, values);
+      const min = r.min_rows ?? (required ? 1 : 0);
+      if (rows.length < min) { errs[inp.key] = m(`Add at least ${min} row(s).`, `أضف ${min} صف على الأقل.`); continue; }
+      if (r.sum) {
+        const total = rows.reduce((a, row) => a + (Number(row[r.sum.column]) || 0), 0);
+        const col = inp.columns.find(c => c.key === r.sum.column);
+        if (Math.abs(total - r.sum.equals) > 0.001) {
+          errs[inp.key] = m(`${col.label} must add up to ${r.sum.equals} (currently ${total}).`, `مجموع ${col.label} يجب أن يساوي ${r.sum.equals} (المجموع الحالي ${total}).`);
+        }
+      }
+      continue;
+    }
+    if (inp.type === "multi") {
+      if (required && !(v || []).length) errs[inp.key] = m("Select at least one item.", "اختر بنداً واحداً على الأقل.");
+      continue;
+    }
+    const s = (v ?? "").toString().trim();
+    if (required && s === "") { errs[inp.key] = m("This field is required.", "هذا الحقل مطلوب."); continue; }
+    if (s === "") continue;
+    if (inp.type === "decimal" && isNaN(Number(s))) { errs[inp.key] = m("Must be a number.", "يجب إدخال رقم."); continue; }
+    if (r.max_length && s.length > r.max_length) errs[inp.key] = m(`Max ${r.max_length} characters.`, `الحد الأقصى ${r.max_length} حرفاً.`);
+    if (r.min != null && Number(s) < r.min) errs[inp.key] = m(`Must be at least ${r.min}.`, `يجب ألا يقل عن ${r.min}.`);
+  }
+  return errs;
+}
+
+function renderText(text, values, highlight) {
+  return esc(text).replace(/\{\{(\w+)\}\}/g, (_, k) => {
+    const v = values[k];
+    if (v === undefined || v === "") return highlight ? `<span class="ph">{{${k}}}</span>` : `{{${k}}}`;
+    return highlight ? `<span class="val">${esc(v)}</span>` : esc(v);
+  });
+}
+
+function orderedParagraphs(part) {
+  const paras = part.paragraphs || [];
+  const order = part.paragraph_order?.length ? part.paragraph_order : paras.map(p => p.id);
+  return order.map(id => paras.find(p => p.id === id)).filter(Boolean);
+}
+
+/* ---------------- form state ---------------- */
+function initDefaults(form, section) {
+  for (const inp of inputsOf(section)) {
+    if (form.values[inp.key] === undefined) form.values[inp.key] = CR.defaultValue(inp, section.template_structure);
+  }
+}
+function newForm(contractId) {
+  const form = { contractId, values: {}, selected: [] };
+  initDefaults(form, mainOf(contractId));
+  return form;
+}
+function formFromInstance(cu) {
+  const main = db.contract_sections.find(s => s.id === cu.contract_section_id);
+  const values = CR.valuesOf([cu.main_contract, ...cu.sub_contract]);
+  return {
+    contractId: main.contract_id,
+    values: JSON.parse(JSON.stringify(values)),
+    selected: [...cu.sub_contract].sort((a, b) => a.order - b.order).map(s => s.source_section_id)
+  };
+}
+
+// Snapshots of the main section and the selected sub-sections, built from the current form values.
+function builderParts() {
+  const f = view.form;
+  const subs = f.selected.map(id => db.contract_sections.find(s => s.id === id)).filter(Boolean);
+  return [CR.snapshot(mainOf(f.contractId), f.values), ...subs.map((s, i) => CR.snapshot(s, f.values, i + 1))];
+}
+
+/* ---------------- persistence (what Laravel would do in one DB transaction) ---------------- */
+async function persist(status) {
+  const f = view.form;
+  const main = mainOf(f.contractId);
+  const subs = f.selected.map(id => db.contract_sections.find(s => s.id === id));
+
+  const errors = validateSection(main, f.values);
+  for (const s of subs) Object.assign(errors, validateSection(s, f.values));
+  view.errors = errors;
+  if (Object.keys(errors).length) {
+    view.flash = { bad: true, text: isRtl(main) ? `يوجد ${Object.keys(errors).length} حقل يحتاج إلى تصحيح.` : `${Object.keys(errors).length} field(s) need attention.` };
+    render();
+    return;
+  }
+
+  const parts = builderParts();
+  const row = {
+    id: view.editId ?? undefined,   // api.php assigns the next id for new rows
+    user_id: USER_ID,
+    contract_section_id: main.id,
+    main_contract: parts[0],
+    sub_contract: parts.slice(1),
+    status
+  };
+
+  try {
+    const saved = (await call({ action: "upsert", table: "user_contracts", row })).row;
+
+    const detail = { user_contract_id: saved.id };
+    const existing = db.contract_details.find(d => d.user_contract_id === saved.id);
+    if (existing) detail.id = existing.id;
+    const stored = CR.valuesOf(parts);
+    for (const c of reportingColumns()) {
+      const v = stored[c.key];
+      detail[c.key] = v === undefined || v === "" ? null : v;
+    }
+    const savedDetail = (await call({ action: "upsert", table: "contract_details", row: detail })).row;
+
+    await load();
+    view.editId = saved.id;
+    view.flash = { text: `Saved user_contracts #${saved.id} (status: ${status}) and contract_details #${savedDetail.id}.` };
+  } catch (e) {
+    view.flash = { bad: true, text: `Save failed: ${e.message}` };
+  }
+  render();
+}
+
+/* ---------------- views ---------------- */
+const TABS = [
+  ["index", "Contracts"],
+  ["builder", "Fill contract"],
+  ["mine", "My contracts"],
+  ["tables", "Database tables"]
+];
+
+function renderTabs() {
+  document.getElementById("tabs").innerHTML = TABS.map(([k, label]) =>
+    `<button class="${view.tab === k ? "active" : ""}" data-tab="${k}" ${k === "builder" && !view.form ? "disabled" : ""}>${label}</button>`
+  ).join("");
+}
+
+function viewIndex() {
+  return `<div class="card"><h2>Available contracts</h2>
+    ${db.contracts.map(c => `
+      <div class="contract-row">
+        <div>
+          <div><b>${esc(c.title_en)}</b></div>
+          <div class="ar muted" style="text-align:left">${esc(c.title_ar)}</div>
+          <div class="muted" style="font-size:12px">${subsOf(c.id).length} optional sub-section(s) · main section fixed</div>
+        </div>
+        <button class="btn" data-start="${c.id}">Start contract</button>
+      </div>`).join("")}
+  </div>`;
+}
+
+function fieldLabel(section, inp) {
+  const r = section.rules[inp.key] || {};
+  const rtl = isRtl(section);
+  const req = r.required || inp.required;
+  const bits = [inp.type, req ? (rtl ? "مطلوب" : "required") : (rtl ? "اختياري" : "optional"),
+    r.max_length ? `max ${r.max_length}` : "", r.min != null ? `min ${r.min}` : "",
+    r.sum ? `Σ ${r.sum.column} = ${r.sum.equals}` : ""].filter(Boolean).join(" · ");
+  return `<span>${inp.label ? `<b>${esc(inp.label)}</b> ` : ""}<code>${inp.key}</code> — ${bits}</span>`;
+}
+const errHtml = key => (view.errors[key] ? `<div class="err">${esc(view.errors[key])}</div>` : "");
+
+function computedText(col, row) {
+  return CR.formatNumber(CR.evalFormula(col.formula, row, view.form.values), col) ?? "-";
+}
+
+function tableEditor(section, inp, items) {
+  const rows = view.form.values[inp.key] || [];
+  const rtl = isRtl(section);
+  const cell = (c, row, i) => {
+    const v = row[c.key] ?? "";
+    const attrs = `data-tkey="${inp.key}" data-row="${i}" data-col="${c.key}"`;
+    if (c.type === "computed") return `<td class="comp" data-comp="${inp.key}|${i}|${c.key}">${esc(computedText(c, row))}</td>`;
+    let options = null;
+    if (c.options) options = c.options.map(o => ({ value: o, label: o }));
+    if (c.source === "selected_items") options = items.map(s => ({ value: s.value, label: `${s.part.title} — ${s.label}` }));
+    if (c.source === "item_options") {
+      const it = items.find(s => s.value === row[c.depends]);
+      options = it?.item.boq_options ? it.item.boq_options.map(o => ({ value: o, label: o })) : null;
+    }
+    if (options) {
+      if (v && !options.some(o => o.value === v)) options.unshift({ value: v, label: v });
+      return `<td><select ${attrs}><option value="">—</option>${options.map(o =>
+        `<option value="${esc(o.value)}" ${o.value === v ? "selected" : ""}>${esc(o.label)}</option>`).join("")}</select></td>`;
+    }
+    const type = c.type === "decimal" ? "number" : c.type === "date" ? "date" : "text";
+    return `<td><input type="${type}" ${c.type === "decimal" ? 'step="0.01"' : ""} ${attrs} value="${esc(v)}"></td>`;
+  };
+  return `<div class="field">${fieldLabel(section, inp)}
+    <div class="table-wrap ${view.errors[inp.key] ? "invalid" : ""}"><table class="edit">
+      <thead><tr>${inp.numbered ? `<th>${esc(inp.numbered)}</th>` : ""}${inp.columns.map(c => `<th>${esc(c.label)}</th>`).join("")}<th></th></tr></thead>
+      <tbody>${rows.map((row, i) => `<tr>${inp.numbered ? `<td class="n">${i + 1}</td>` : ""}${inp.columns.map(c => cell(c, row, i)).join("")}
+        <td><button type="button" class="btn danger small" data-delrow="${inp.key}|${i}" aria-label="Remove row ${i + 1}">✕</button></td></tr>`).join("")}</tbody>
+    </table></div>
+    <button type="button" class="btn ghost small" data-addrow="${inp.key}">+ ${rtl ? "إضافة صف" : "Add row"}</button>
+    ${errHtml(inp.key)}</div>`;
+}
+
+function inputField(section, inp, items) {
+  const v = view.form.values[inp.key];
+  const invalid = view.errors[inp.key] ? "invalid" : "";
+  switch (inp.type) {
+    case "textarea":
+      return `<label class="field">${fieldLabel(section, inp)}<textarea data-key="${inp.key}" rows="3" class="${invalid}">${esc(v ?? "")}</textarea>${errHtml(inp.key)}</label>`;
+    case "choice":
+      return `<div class="field">${fieldLabel(section, inp)}<div class="choices">${inp.options.map(o =>
+        `<label class="choice"><input type="radio" name="${inp.key}" data-key="${inp.key}" value="${esc(o.value)}" ${v === o.value ? "checked" : ""}> ${esc(o.label)}</label>`).join("")}</div>${errHtml(inp.key)}</div>`;
+    case "multi": {
+      const chosen = new Set(v || []);
+      return `<div class="field">${fieldLabel(section, inp)}<div class="multi">${(section.template_structure[inp.source] || []).map(o =>
+        `<label class="choice"><input type="checkbox" data-multi="${inp.key}" data-val="${esc(o.key)}" ${chosen.has(o.key) ? "checked" : ""}> ${esc(o.title)}</label>`).join("")}</div>${errHtml(inp.key)}</div>`;
+    }
+    case "table":
+      return tableEditor(section, inp, items);
+    default:
+      return `<label class="field">${fieldLabel(section, inp)}
+        <input type="${inp.type === "decimal" ? "number" : "text"}" ${inp.type === "decimal" ? 'step="0.01"' : ""}
+          data-key="${inp.key}" value="${esc(v ?? "")}" class="${invalid}">${errHtml(inp.key)}</label>`;
+  }
+}
+
+function formHtml() {
+  const f = view.form;
+  const contract = db.contracts.find(c => c.id === f.contractId);
+  const main = mainOf(f.contractId);
+  const subs = subsOf(f.contractId);
+  const rtl = isRtl(main);
+  const items = CR.selectedItems(builderParts());
+
+  return `<div class="card" ${rtl ? 'dir="rtl"' : ""}>
+      <h2>${rtl ? `${esc(contract.title_ar)} <span class="muted">${esc(contract.title_en)}</span>` : `${esc(contract.title_en)} <span class="ar muted">${esc(contract.title_ar)}</span>`}</h2>
+      <div class="muted" style="margin-bottom:12px">${view.editId ? `Editing user_contracts #${view.editId}` : "New instance (not yet saved)"}</div>
+
+      <div class="section">
+        <div class="section-head"><b>${esc(main.template.title)}</b>
+          <span class="tag fixed">main · fixed</span><span class="muted" style="font-size:12px">section #${main.id}</span></div>
+        ${inputsOf(main).map(i => inputField(main, i, items)).join("")}
+      </div>
+
+      <h3 style="margin-top:16px">${rtl ? "أقسام الأعمال الاختيارية" : "Optional sub-sections"}</h3>
+      ${subs.map(s => {
+        const on = f.selected.includes(s.id);
+        return `<div class="section ${on ? "" : "off"}">
+          <label class="section-head" style="cursor:pointer">
+            <input type="checkbox" data-sub="${s.id}" ${on ? "checked" : ""}>
+            <b>${s.template_structure.section_no ? `${s.template_structure.section_no}. ` : ""}${esc(s.template.title)}</b><span class="tag">sub</span>
+            <span class="muted" style="font-size:12px">section #${s.id}</span>
+            ${on ? `<span class="muted end" style="font-size:12px">order ${f.selected.indexOf(s.id) + 1}</span>` : ""}
+          </label>
+          ${on ? inputsOf(s).map(i => inputField(s, i, items)).join("") : ""}
+        </div>`;
+      }).join("")}
+
+      <div class="actions">
+        <button class="btn" data-save="draft">Save draft</button>
+        <button class="btn ghost" data-save="submitted">Submit</button>
+        ${view.editId ? `<a class="btn ghost" style="text-decoration:none" href="contract.html?id=${view.editId}">Document</a>` : ""}
+        <button class="btn ghost" data-go="tables">View tables →</button>
+      </div>
+    </div>`;
+}
+
+function previewHtml() {
+  const parts = builderParts();
+  const body = CR.isTyped(parts[0])
+    ? CR.renderBody(parts, { highlight: true })
+    : parts.map(s => `<h3>${esc(s.title)}</h3>${orderedParagraphs(s).map(p => `<p>${renderText(p.text, view.form.values, true)}</p>`).join("")}`).join("");
+  const subs = parts.slice(1);
+  return `
+    <div class="card preview">
+      <h2>What the contractor sees</h2>
+      <div class="doc-scroll">${body}</div>
+    </div>
+    <div class="card">
+      <h2>Payload to be saved</h2>
+      <details><summary>user_contracts.sub_contract (${subs.length} item${subs.length === 1 ? "" : "s"})</summary><pre>${json(subs)}</pre></details>
+      <details><summary>user_contracts.main_contract</summary><pre>${json(parts[0])}</pre></details>
+    </div>`;
+}
+
+function viewBuilder() {
+  const flash = view.flash ? `<div class="flash ${view.flash.bad ? "bad" : ""}">${esc(view.flash.text)}</div>` : "";
+  return `${flash}<div class="grid"><div id="formCol">${formHtml()}</div><div id="previewCol">${previewHtml()}</div></div>`;
+}
+
+function viewMine() {
+  const rows = db.user_contracts.filter(r => r.user_id === USER_ID);
+  if (!rows.length) return `<div class="card"><h2>My contracts</h2><p class="muted">No saved contracts yet. Start one from the Contracts tab.</p></div>`;
+  return rows.map(cu => {
+    const parts = [cu.main_contract, ...[...cu.sub_contract].sort((a, b) => a.order - b.order)];
+    const vals = CR.valuesOf(parts);
+    const typed = CR.isTyped(cu.main_contract);
+    const body = typed
+      ? `<div dir="rtl" class="ar" style="text-align:right">
+          <h3>${esc(cu.main_contract.title)}</h3>
+          <p>الأقسام المختارة: ${cu.sub_contract.map(s => esc(s.title)).join("، ") || "لا يوجد"}</p>
+          ${vals.contract_value ? `<p>قيمة العقد: ${esc(CR.formatNumber(vals.contract_value, { money: true }))} ريال</p>` : ""}
+        </div>`
+      : parts.map(s => `<h3>${esc(s.title)}</h3>${orderedParagraphs(s).map(p => `<p>${renderText(p.text, vals, false)}</p>`).join("")}`).join("");
+    return `<div class="card preview">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <h2 style="margin:0">user_contracts #${cu.id} <span class="tag st">${esc(cu.status)}</span></h2>
+        <div class="row-actions">
+          <a class="btn ghost small" style="text-decoration:none" href="contract.html?id=${cu.id}">Document</a>
+          <button class="btn ghost small" data-edit="${cu.id}">Edit</button>
+          <button class="btn danger small" data-del="${cu.id}">Delete</button>
+        </div>
+      </div>
+      <div class="muted" style="font-size:12px">Rendered from the stored JSON snapshot, not the live template.</div>
+      ${body}
+    </div>`;
+  }).join("");
+}
+
+function htmlTable(cols, rows, fmt) {
+  return `<div class="table-wrap"><table><thead><tr>${cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead>
+    <tbody>${rows.length ? rows.map(r => `<tr>${cols.map(c => fmt(r, c)).join("")}</tr>`).join("")
+      : `<tr><td colspan="${cols.length}" class="null">empty</td></tr>`}</tbody></table></div>`;
+}
+
+function viewTables() {
+  const cols = reportingColumns();
+  const cell = (r, c) => {
+    const v = r[c];
+    if (v == null) return `<td class="null">NULL</td>`;
+    if (typeof v === "object") return `<td class="null" title="${esc(JSON.stringify(v))}">JSON [${Array.isArray(v) ? v.length : Object.keys(v).length}]</td>`;
+    return `<td>${esc(v)}</td>`;
+  };
+  const migration = c => {
+    if (c.sqlType.startsWith("DECIMAL")) return `decimal('${c.key}', 15, 2)`;
+    if (c.sqlType === "JSON") return `json('${c.key}')`;
+    if (c.sqlType === "TEXT") return `text('${c.key}')`;
+    return `string('${c.key}', ${c.sqlType.match(/\d+/)[0]})`;
+  };
+  return `
+    <div class="card"><h2>1. contracts</h2>
+      ${htmlTable(["id", "title_ar", "title_en"], db.contracts, cell)}</div>
+
+    <div class="card"><h2>2. contract_sections</h2>
+      ${htmlTable(["id", "contract_id", "type", "section_key", "fixed", "inputs", "status"], db.contract_sections, (r, c) => {
+        const map = {
+          section_key: r.template_structure.section_key,
+          fixed: String(r.template_structure.fixed),
+          inputs: inputsOf(r).map(i => i.key).join(", ")
+        };
+        return `<td>${esc(map[c] ?? r[c])}</td>`;
+      })}
+      <details style="margin-top:10px"><summary>Full JSON</summary><pre style="margin-top:8px">${json(db.contract_sections)}</pre></details>
+    </div>
+
+    <div class="card"><h2>3. user_contracts</h2>
+      ${htmlTable(["id", "user_id", "contract_section_id", "main_contract", "sub_contract", "status"], db.user_contracts, (r, c) => {
+        if (c === "main_contract") return `<td>{ ${esc(r.main_contract.section_key)} v${r.main_contract.version} }</td>`;
+        if (c === "sub_contract") return `<td>${r.sub_contract.length ? `[ ${r.sub_contract.map(s => esc(s.section_key)).join(", ")} ]` : "[]"}</td>`;
+        return `<td>${esc(r[c])}</td>`;
+      })}
+      <details style="margin-top:10px"><summary>Full JSON</summary><pre style="margin-top:8px">${json(db.user_contracts)}</pre></details>
+    </div>
+
+    <div class="card"><h2>4. contract_details <span class="muted" style="font-weight:400">— reporting columns</span></h2>
+      ${htmlTable(["id", "user_contract_id", ...cols.map(c => c.key)], db.contract_details, cell)}
+      <h3 style="margin-top:14px">Migration</h3>
+      <pre>${esc(`Schema::create('contract_details', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('user_contract_id')->constrained('user_contracts')->cascadeOnDelete();
+${cols.map(c => `    $table->${migration(c)}${c.nullable ? "->nullable()" : ""};`).join("\n")}
+    $table->timestamps();
+});`)}</pre>
+    </div>
+
+    <div class="actions"><button class="btn danger" data-reset>Reset demo data</button></div>`;
+}
+
+function render() {
+  renderTabs();
+  const app = document.getElementById("app");
+  app.innerHTML =
+    view.tab === "index" ? viewIndex() :
+    view.tab === "builder" ? viewBuilder() :
+    view.tab === "mine" ? viewMine() : viewTables();
+}
+
+// Refresh only the preview and computed table cells, so the field being typed in keeps focus.
+function refreshLive() {
+  const inputs = allInputs();
+  document.querySelectorAll("[data-comp]").forEach(td => {
+    const [key, i, col] = td.dataset.comp.split("|");
+    const column = inputs[key]?.columns.find(c => c.key === col);
+    const row = view.form.values[key]?.[i];
+    if (column && row) td.textContent = computedText(column, row);
+  });
+  const previewCol = document.getElementById("previewCol");
+  if (previewCol) {
+    const scroll = previewCol.querySelector(".doc-scroll")?.scrollTop ?? 0;
+    previewCol.innerHTML = previewHtml();
+    const box = previewCol.querySelector(".doc-scroll");
+    if (box) box.scrollTop = scroll;
+  }
+}
+
+function clearError(key, el) {
+  if (!view.errors[key]) return;
+  delete view.errors[key];
+  el?.closest(".field")?.querySelector(".err")?.remove();
+  el?.classList.remove("invalid");
+}
+
+/* ---------------- events ---------------- */
+document.addEventListener("click", async e => {
+  const t = e.target.closest("button, input[type=checkbox]");
+  if (!t) return;
+  const d = t.dataset;
+  if (d.tab) { view.tab = d.tab; view.flash = null; render(); }
+  else if (d.go) { view.tab = d.go; view.flash = null; render(); }
+  else if (d.start) {
+    view = { tab: "builder", contractId: +d.start, editId: null, form: newForm(+d.start), errors: {}, flash: null };
+    render();
+  }
+  else if (d.sub) {
+    const id = +d.sub, sel = view.form.selected;
+    view.form.selected = sel.includes(id) ? sel.filter(x => x !== id) : [...sel, id];
+    if (!sel.includes(id)) initDefaults(view.form, db.contract_sections.find(s => s.id === id));
+    view.flash = null; render();
+  }
+  else if (d.multi) {
+    const list = new Set(view.form.values[d.multi] || []);
+    list.has(d.val) ? list.delete(d.val) : list.add(d.val);
+    const section = db.contract_sections.find(s => inputsOf(s).some(i => i.key === d.multi));
+    view.form.values[d.multi] = (section.template_structure.items || []).map(i => i.key).filter(k => list.has(k));
+    delete view.errors[d.multi];
+    render();
+  }
+  else if (d.addrow) {
+    (view.form.values[d.addrow] ||= []).push({});
+    delete view.errors[d.addrow];
+    render();
+  }
+  else if (d.delrow) {
+    const [key, i] = d.delrow.split("|");
+    view.form.values[key].splice(+i, 1);
+    render();
+  }
+  else if (d.save) persist(d.save);
+  else if (d.edit) {
+    const cu = db.user_contracts.find(r => r.id === +d.edit);
+    view = { tab: "builder", contractId: null, editId: cu.id, form: formFromInstance(cu), errors: {}, flash: null };
+    render();
+  }
+  else if (d.del) {
+    if (!confirm(`Delete user_contracts #${d.del} and its contract_details row?`)) return;
+    try {
+      // Delete the reporting row first: api.php refuses to delete a row that is still referenced.
+      for (const det of db.contract_details.filter(r => r.user_contract_id === +d.del)) {
+        await call({ action: "delete", table: "contract_details", id: det.id });
+      }
+      await call({ action: "delete", table: "user_contracts", id: +d.del });
+    } catch (err) { alert(err.message); }
+    if (view.editId === +d.del) { view.editId = null; view.form = null; }
+    await load(); render();
+  }
+  else if ("reset" in d) {
+    if (!confirm("Reset all demo data?")) return;
+    await call({ action: "reset" });
+    await load();
+    view = { tab: "index", contractId: null, editId: null, form: null, errors: {}, flash: null };
+    render();
+  }
+});
+
+document.addEventListener("input", e => {
+  const el = e.target, d = el.dataset || {};
+  if (d.key) {
+    view.form.values[d.key] = el.value;
+    clearError(d.key, el);
+    refreshLive();
+  } else if (d.tkey) {
+    const rows = view.form.values[d.tkey];
+    rows[+d.row] = { ...rows[+d.row], [d.col]: el.value };
+    clearError(d.tkey, el);
+    refreshLive();
+  }
+});
+
+// Selects inside tables can change the options of other columns (item → option), so redraw the form.
+document.addEventListener("change", e => {
+  const d = e.target.dataset || {};
+  if (e.target.tagName !== "SELECT" || !d.tkey) return;
+  const row = view.form.values[d.tkey][+d.row];
+  for (const c of allInputs()[d.tkey].columns) if (c.depends === d.col) row[c.key] = "";
+  render();
+});
+
+load().then(render).catch(e => {
+  document.getElementById("app").innerHTML = `<div class="card"><b>Could not reach api.php.</b>
+    <p class="muted">${esc(e.message)}. Open this page through Apache, e.g. <code>http://localhost/econtract_demo/</code>, not as a file.</p></div>`;
+});
+</script>
+</body>
+</html>

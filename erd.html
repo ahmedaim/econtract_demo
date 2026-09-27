@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eContract DB Diagram</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #fff; --text: #1d2330; --muted: #6b7280; --line: #e3e6eb;
+    --accent: #1f6feb; --accent-soft: #e8f0fe; --code: #0f172a; --pk: #9a5b00; --fk: #1f6feb; --json: #7c3aed;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; background: var(--bg); color: var(--text); }
+  header { background: var(--code); color: #fff; padding: 14px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  header h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  header a { color: #9ec1ff; text-decoration: none; margin-left: auto; font-size: 13px; }
+  main { max-width: 1260px; margin: 0 auto; padding: 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 15px; margin: 0 0 12px; }
+  .scroll { overflow-x: auto; }
+  #canvas { position: relative; width: 1200px; height: 640px; }
+  #edges { position: absolute; inset: 0; pointer-events: none; }
+  .tbl { position: absolute; width: 270px; background: #fff; border: 1px solid #cfd5dd; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); overflow: hidden; transition: box-shadow .15s, border-color .15s; }
+  .tbl.ext { border-style: dashed; opacity: .75; }
+  .tbl.hl { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .tbl.dim, path.dim, text.dim { opacity: .25; }
+  .tbl h3 { margin: 0; padding: 8px 12px; font-size: 13px; background: var(--code); color: #fff; font-family: Consolas, monospace; display: flex; justify-content: space-between; }
+  .tbl h3 small { font-weight: 400; opacity: .7; font-family: system-ui, sans-serif; }
+  .tbl.ext h3 { background: #64748b; }
+  .col { display: flex; gap: 8px; padding: 4px 12px; border-top: 1px solid var(--line); font: 12px/1.6 Consolas, monospace; }
+  .col .k { width: 26px; font-weight: 700; font-size: 10px; align-self: center; }
+  .col .n { flex: 1; }
+  .col .t { color: var(--muted); }
+  .col.pk .k { color: var(--pk); }
+  .col.fk .k { color: var(--fk); }
+  .col.js .k { color: var(--json); }
+  .col.rep { background: #fbfaf5; }
+  path.edge { fill: none; stroke: #64748b; stroke-width: 1.6; }
+  path.edge.fk { stroke: var(--fk); }
+  path.edge.logical { stroke: var(--json); stroke-dasharray: 6 4; }
+  text.card-l { font: 700 11px system-ui, sans-serif; fill: var(--text); }
+  .legend { display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend b { font: 700 10px Consolas, monospace; }
+  .sw { display: inline-block; width: 28px; border-top: 2px solid var(--fk); }
+  .sw.logical { border-top: 2px dashed var(--json); }
+  ul { margin: 0; padding-left: 20px; }
+  li { margin: 4px 0; }
+  code { background: #eef1f4; padding: 0 4px; border-radius: 3px; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>eContract DB Diagram</h1>
+  <a href="index.html">← Back to demo</a>
+</header>
+<main>
+  <div class="card">
+    <div class="legend">
+      <span><b style="color:var(--pk)">PK</b> primary key</span>
+      <span><b style="color:var(--fk)">FK</b> foreign key</span>
+      <span><b style="color:var(--json)">{ }</b> JSON column</span>
+      <span><span class="sw"></span> foreign-key relation</span>
+      <span><span class="sw logical"></span> reference inside JSON (not enforced)</span>
+      <span class="muted">Hover a table to highlight its relations.</span>
+    </div>
+  </div>
+
+  <div class="card scroll">
+    <div id="canvas">
+      <svg id="edges" width="1200" height="640"></svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Relationships</h2>
+    <ul>
+      <li><code>contracts</code> 1 — N <code>contract_sections</code> via <code>contract_id</code>. Each contract has one <code>main</code> section and any number of <code>sub</code> sections.</li>
+      <li><code>contract_sections</code> 1 — N <code>user_contracts</code> via <code>contract_section_id</code>, which always points to the <b>main</b> section.</li>
+      <li><code>users</code> 1 — N <code>user_contracts</code> via <code>user_id</code> (the contractor).</li>
+      <li><code>user_contracts.sub_contract[].source_section_id</code> points to the selected <b>sub</b> sections. It lives inside JSON, so the database doesn't enforce it.</li>
+      <li><code>user_contracts</code> 1 — 1 <code>contract_details</code> via <code>user_contract_id</code>. Every template input key becomes a column there. Inputs from sub-sections are <code>NULL</code> when that sub-section isn't selected.</li>
+    </ul>
+  </div>
+</main>
+
+<script>
+const TABLES = [
+  { name: "contracts", x: 20, y: 30, cols: [
+    ["pk", "id", "BIGINT"],
+    ["", "title_ar", "VARCHAR(255)"],
+    ["", "title_en", "VARCHAR(255)"],
+  ]},
+  { name: "contract_sections", x: 340, y: 30, cols: [
+    ["pk", "id", "BIGINT"],
+    ["fk", "contract_id", "BIGINT"],
+    ["", "type", "ENUM(main,sub)"],
+    ["js", "template_structure", "JSON"],
+    ["js", "template", "JSON"],
+    ["js", "rules", "JSON"],
+    ["", "status", "VARCHAR(20)"],
+  ]},
+  { name: "user_contracts", x: 640, y: 30, cols: [
+    ["pk", "id", "BIGINT"],
+    ["fk", "user_id", "BIGINT"],
+    ["fk", "contract_section_id", "BIGINT"],
+    ["js", "main_contract", "JSON"],
+    ["js", "sub_contract", "JSON"],
+    ["", "status", "VARCHAR(20)"],
+  ]},
+  { name: "users", x: 920, y: 300, ext: true, note: "Laravel", cols: [
+    ["pk", "id", "BIGINT"],
+    ["", "name", "VARCHAR(255)"],
+    ["", "email", "VARCHAR(255)"],
+  ]},
+  { name: "contract_details", x: 340, y: 360, note: "reporting", cols: [
+    ["pk", "id", "BIGINT"],
+    ["fk", "user_contract_id", "BIGINT"],
+    ["rep", "project_name", "VARCHAR(255)"],
+    ["rep", "contract_value", "DECIMAL(15,2)"],
+    ["rep", "paint_brand", "VARCHAR(100) NULL"],
+    ["rep", "tile_area_sqm", "DECIMAL(15,2) NULL"],
+  ]},
+];
+
+// [fromTable, fromCol, toTable, toCol, fromCard, toCard, kind]
+const EDGES = [
+  ["contract_sections", "contract_id", "contracts", "id", "N", "1", "fk"],
+  ["user_contracts", "contract_section_id", "contract_sections", "id", "N", "1", "fk"],
+  ["user_contracts", "sub_contract", "contract_sections", "id", "N", "N", "logical"],
+  ["user_contracts", "user_id", "users", "id", "N", "1", "fk"],
+  ["contract_details", "user_contract_id", "user_contracts", "id", "1", "1", "fk"],
+];
+
+const KEY = { pk: "PK", fk: "FK", js: "{ }", rep: "", "": "" };
+const canvas = document.getElementById("canvas");
+const svg = document.getElementById("edges");
+const esc = s => String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+function buildTables() {
+for (const t of TABLES) {
+  const el = document.createElement("div");
+  el.className = "tbl" + (t.ext ? " ext" : "");
+  el.dataset.table = t.name;
+  el.style.left = t.x + "px";
+  el.style.top = t.y + "px";
+  el.innerHTML = `<h3>${t.name}${t.note ? `<small>${t.note}</small>` : ""}</h3>` +
+    t.cols.map(([k, n, type]) =>
+      `<div class="col ${k === "rep" ? "rep" : k}" data-col="${n}"><span class="k">${KEY[k]}</span><span class="n">${n}</span><span class="t">${esc(type)}</span></div>`
+    ).join("");
+  canvas.appendChild(el);
+}
+// Grow the canvas to fit the tallest table (contract_details gains a column per template input).
+const bottom = Math.max(...[...canvas.querySelectorAll(".tbl")].map(el => el.offsetTop + el.offsetHeight));
+canvas.style.height = Math.max(640, bottom + 24) + "px";
+svg.setAttribute("height", Math.max(640, bottom + 24));
+}
+
+function anchor(table, col) {
+  const tEl = canvas.querySelector(`[data-table="${table}"]`);
+  const cEl = tEl.querySelector(`[data-col="${col}"]`);
+  const cr = canvas.getBoundingClientRect(), tr = tEl.getBoundingClientRect(), r = cEl.getBoundingClientRect();
+  return { left: tr.left - cr.left, right: tr.right - cr.left, y: r.top - cr.top + r.height / 2 };
+}
+
+function drawEdges() {
+  svg.innerHTML = "";
+  const NS = "http://www.w3.org/2000/svg";
+  for (const [ft, fc, tt, tc, fcard, tcard, kind] of EDGES) {
+    const a = anchor(ft, fc), b = anchor(tt, tc);
+    let x1, x2, d, lx1, lx2;
+    if (a.left >= b.right) {            // source is right of target
+      x1 = a.left; x2 = b.right;
+      const m = (x1 + x2) / 2;
+      d = `M${x1},${a.y} C${m},${a.y} ${m},${b.y} ${x2},${b.y}`;
+      lx1 = x1 - 12; lx2 = x2 + 6;
+    } else if (a.right <= b.left) {     // source is left of target
+      x1 = a.right; x2 = b.left;
+      const m = (x1 + x2) / 2;
+      d = `M${x1},${a.y} C${m},${a.y} ${m},${b.y} ${x2},${b.y}`;
+      lx1 = x1 + 6; lx2 = x2 - 12;
+    } else {                            // overlapping columns: loop out on the left
+      x1 = a.left; x2 = b.left;
+      const out = Math.min(x1, x2) - 60;
+      d = `M${x1},${a.y} C${out},${a.y} ${out},${b.y} ${x2},${b.y}`;
+      lx1 = x1 - 12; lx2 = x2 - 12;
+    }
+    const p = document.createElementNS(NS, "path");
+    p.setAttribute("d", d);
+    p.setAttribute("class", `edge ${kind}`);
+    p.dataset.a = ft; p.dataset.b = tt;
+    svg.appendChild(p);
+    for (const [x, y, label] of [[lx1, a.y - 5, fcard], [lx2, kind === "logical" ? b.y + 14 : b.y - 5, tcard]]) {
+      const t = document.createElementNS(NS, "text");
+      t.setAttribute("x", x); t.setAttribute("y", y);
+      t.setAttribute("class", "card-l");
+      t.dataset.a = ft; t.dataset.b = tt;
+      t.textContent = label;
+      svg.appendChild(t);
+    }
+  }
+}
+
+canvas.addEventListener("mouseover", e => {
+  const tbl = e.target.closest(".tbl");
+  if (!tbl) return;
+  const name = tbl.dataset.table;
+  const related = new Set([name]);
+  for (const [ft, , tt] of EDGES) if (ft === name || tt === name) { related.add(ft); related.add(tt); }
+  canvas.querySelectorAll(".tbl").forEach(el => {
+    el.classList.toggle("hl", el.dataset.table === name);
+    el.classList.toggle("dim", !related.has(el.dataset.table));
+  });
+  svg.querySelectorAll("path, text").forEach(el =>
+    el.classList.toggle("dim", el.dataset.a !== name && el.dataset.b !== name));
+});
+canvas.addEventListener("mouseleave", () =>
+  canvas.querySelectorAll(".hl, .dim").forEach(el => el.classList.remove("hl", "dim")));
+
+// Reporting columns of contract_details come from the section templates in data/*.json.
+fetch("api.php", { cache: "no-store" })
+  .then(r => r.json())
+  .then(({ reporting_columns: cols, tables }) => {
+    const maxLen = k => tables.contract_sections.map(s => s.rules?.[k]?.max_length).find(Boolean) || 255;
+    const details = TABLES.find(t => t.name === "contract_details");
+    details.cols = details.cols.filter(c => c[0] !== "rep").concat(
+      Object.entries(cols).map(([k, type]) => ["rep", k, type === "decimal" ? "DECIMAL(15,2)" : type === "table" || type === "multi" ? "JSON" : type === "textarea" ? "TEXT" : type === "choice" ? "VARCHAR(50)" : `VARCHAR(${maxLen(k)})`]));
+  })
+  .catch(() => {})   // opened without Apache: keep the built-in column list
+  .finally(() => { buildTables(); drawEdges(); });
+</script>
+</body>
+</html>
